@@ -43,7 +43,7 @@ import com.google.api.client.json.jackson.JacksonFactory;
 public class PubSearch {
 
 	// Google API Key
-	private static final String API_KEY = "YOUR_GOOGLE_API_KEY_HERE";
+	private static final String API_KEY = "AIzaSyAP8HSy-2r57WhvO8KcmEdw5rfMrcUtGLU";
 	private static final String PLACES_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/search/json?";
 	private static final String PLACES_TEXT_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/search/json?";
 	private static final String PLACES_DETAILS_URL = "https://maps.googleapis.com/maps/api/place/details/json?"; 
