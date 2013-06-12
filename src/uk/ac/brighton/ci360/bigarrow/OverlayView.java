@@ -11,20 +11,27 @@ import android.hardware.Camera;
 import android.hardware.Camera.PreviewCallback;
 import android.location.Location;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 public class OverlayView extends SurfaceView {
-	private SurfaceHolder mOverSH;
-	private Camera mCam;
+	protected static final String TAG = "OverlayView";
+	private SurfaceHolder surfaceHolder;
+	private Camera camera;
 	private Camera.Size frameSize;
 	private Place nearestPub;
 	private Location npLocation;
 	private float distance;
 
+	public OverlayView(Context ctx) {
+        super(ctx);
+        surfaceHolder= getHolder();
+    }
+	
 	public OverlayView(Context ctx, AttributeSet attr) {
 		super(ctx, attr);
-		mOverSH = getHolder();
+		surfaceHolder = getHolder();
 	}
 
 	// Called by Sobel.surfaceChanged, to set dimensions
@@ -34,11 +41,12 @@ public class OverlayView extends SurfaceView {
 
 	// Called by initCamera, to set callback
 	public void setCamera(Camera c) {
-		mCam = c;
-		mCam.setPreviewCallback(new PreviewCallback() {
+		camera = c;
+		camera.setPreviewCallback(new PreviewCallback() {
 			// Called by camera hardware, with preview frame
 			public void onPreviewFrame(byte[] frame, Camera c) {
-				Canvas canvas = mOverSH.lockCanvas(null);
+				//Log.d(TAG, "surfaceHolder is null?"+(surfaceHolder == null));
+				Canvas canvas = surfaceHolder.lockCanvas(null);
 				canvas.drawColor( 0, PorterDuff.Mode.CLEAR );
 				try {
 					// Perform overlay rendering here
@@ -75,7 +83,7 @@ public class OverlayView extends SurfaceView {
 				} catch (Exception e) {
 					// Log/trap rendering errors
 				} finally {
-					mOverSH.unlockCanvasAndPost(canvas);
+					surfaceHolder.unlockCanvasAndPost(canvas);
 				}
 			}
 		});

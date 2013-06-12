@@ -24,7 +24,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback, Lo
 	private SurfaceHolder cameraSH;
 	private OverlayView overlay;
 	private PubSearch pSearch;
-	private final boolean PLACES_SEARCH_ON = false;
+	private final boolean PLACES_SEARCH_ON = true;
 
 	/* Activity event handlers */
 	// Called when activity is initialised by OS
@@ -136,9 +136,15 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback, Lo
 
 	// Stop camera when application ends
 	private void stopCamera() {
-		cameraSH.removeCallback(this);
-		camera.stopPreview();
-		camera.release();
+		if (cameraSH != null) {
+			cameraSH.removeCallback(this);
+			cameraSH = null;
+		}
+		if (camera != null) {
+			camera.stopPreview();
+			camera.release();
+			camera = null;
+		}
 	}
 	
 	private void getNearestPub(Location l) {
