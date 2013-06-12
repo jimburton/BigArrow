@@ -1,6 +1,6 @@
 package uk.ac.brighton.ci360.bigarrow;
 
-import uk.ac.brighton.ci360.bigarrow.places.Place;
+import uk.ac.brighton.ci360.bigarrow.places.Place; 
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -76,7 +76,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback, Lo
 
 		camera = Camera.open();
 
-		overlay = (OverlayView) findViewById(R.id.surface_overlay);
+		overlay = (OverlayView) findViewById(R.id.surface_overlay); 
 		overlay.getHolder().setFormat(PixelFormat.TRANSLUCENT);
 		overlay.setCamera(camera);
 	}
