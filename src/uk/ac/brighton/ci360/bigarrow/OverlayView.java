@@ -27,6 +27,8 @@ public class OverlayView extends SurfaceView {
 	public OverlayView(Context ctx) {
         super(ctx);
         surfaceHolder= getHolder();
+        nearestPub = new Place();
+        nearestPub.name = "Searching";
     }
 	
 	public OverlayView(Context ctx, AttributeSet attr) {
@@ -55,10 +57,9 @@ public class OverlayView extends SurfaceView {
 					pt.setColor(Color.BLACK);
 					pt.setTextSize(70);
 					
-					//canvas.drawText(Integer.toString(mFrameCount++), 10, frameSize.height-10, pt);
-					if(nearestPub != null && distance > 0) {
-						canvas.drawText(nearestPub.name+": "+(int)distance+"m", 10, frameSize.height-10, pt);
-					}
+					String pubTxt = nearestPub.name;
+					if(distance > 0) pubTxt += (int)distance+"m";
+					canvas.drawText(pubTxt, 10, frameSize.height-10, pt);
 					
 					Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
