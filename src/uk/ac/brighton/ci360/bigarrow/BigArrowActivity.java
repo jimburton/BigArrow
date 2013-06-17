@@ -1,5 +1,7 @@
 package uk.ac.brighton.ci360.bigarrow;
 
+import java.util.List;
+
 import uk.ac.brighton.ci360.bigarrow.places.Place;
 import android.app.Activity;
 import android.content.Context;
@@ -16,15 +18,16 @@ import android.view.SurfaceView;
 import android.view.Window;
 import android.view.WindowManager;
 
-public class MainActivity extends Activity implements SurfaceHolder.Callback, LocationListener {
+public class BigArrowActivity extends Activity implements SurfaceHolder.Callback, 
+															LocationListener, PubSearchRequester {
 
 	private static final String TAG = "BigArrow";
 	private Camera camera;
 	private SurfaceView cameraSV;
 	private SurfaceHolder cameraSH;
-	private OverlayView overlay;
+	private OverlayView overlay; 
 	private PubSearch pSearch;
-	private final boolean PLACES_SEARCH_ON = true;
+	private final boolean PLACES_SEARCH_ON = true; 
 
 	/* Activity event handlers */
 	// Called when activity is initialised by OS
@@ -35,7 +38,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback, Lo
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
 				WindowManager.LayoutParams.FLAG_FULLSCREEN);
-		setContentView(R.layout.activity_main);
+		setContentView(R.layout.activity_bigarrow);
 		initCamera();
 		if (PLACES_SEARCH_ON) pSearch = new PubSearch(this);
 		
@@ -70,46 +73,27 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback, Lo
 	}
 
 	private void initCamera() {
-		cameraSV = (SurfaceView) findViewById(R.id.surface_camera);
+		//cameraSV = (SurfaceView) findViewById(R.id.surface_camera);
 		cameraSH = cameraSV.getHolder();
 		cameraSH.addCallback(this);
 
-		camera = Camera.open();
+		try {
+			camera = Camera.open();
+		} catch (RuntimeException e) {
+			Log.e(TAG, "Failed to connect to camera");
+		}
 
-		overlay = (OverlayView) findViewById(R.id.surface_overlay);
+		//overlay = (OverlayView) findViewById(R.id.surface_overlay);
+		//overlay.setZOrderMediaOverlay(true);
 		overlay.getHolder().setFormat(PixelFormat.TRANSLUCENT);
 		overlay.setCamera(camera);
 	}
 
 	// Setup camera based on surface parameters
 
-	/*
-	 * private void startCamera(SurfaceHolder sh, int width, int height) {
-	 * Camera.Parameters p = camera.getParameters(); p.setPreviewSize(width,
-	 * height); if (this.getResources().getConfiguration().orientation !=
-	 * Configuration.ORIENTATION_LANDSCAPE) { //p.set("orientation",
-	 * "portrait"); //p.setRotation(90); camera.setDisplayOrientation(90);
-	 * p.setPreviewSize(height, width); } else { //p.set("orientation",
-	 * "landscape"); //p.setRotation(0); camera.setDisplayOrientation(0);
-	 * p.setPreviewSize(width, height); }
-	 * 
-	 * camera.setParameters(p);
-	 * 
-	 * try { camera.setPreviewDisplay(sh); } catch (Exception e) { // Log
-	 * surface setting exceptions }
-	 * 
-	 * camera.startPreview(); }
-	 */
-
 	private void startCamera(SurfaceHolder sh, int width, int height) {
 		Camera.Parameters p = camera.getParameters();
-		for (Camera.Size s : p.getSupportedPreviewSizes()) { // In this
-																// instance,
-																// simply use
-																// the first
-																// available
-			// preview size; could be refined to find the closest
-			// values to the surface size
+		for (Camera.Size s : p.getSupportedPreviewSizes()) { 
 
 			p.setPreviewSize(s.width, s.height);
 			overlay.setPreviewSize(s);
@@ -179,5 +163,23 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback, Lo
 	public void onStatusChanged(String provider, int status, Bundle extras) {
 		// TODO Auto-generated method stub
 	}
+	
+	@Override
+	public void onPause() {
+		camera.setPreviewCallback(null); 
+		overlay.getHolder().removeCallback(this);
+		camera.release();
+	}
+
+	@Override
+	public void updateNearestPubs(List<Place> places) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	/*@Override
+	public void onResume() {
+		initCamera();
+	}*/
 	
 }

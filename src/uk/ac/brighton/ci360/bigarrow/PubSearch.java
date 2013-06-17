@@ -43,7 +43,7 @@ import com.google.api.client.json.jackson.JacksonFactory;
 public class PubSearch {
 
 	// Google API Key
-	private static final String API_KEY = "YOUR_API_KEY";
+	private static final String API_KEY = "AIzaSyAP8HSy-2r57WhvO8KcmEdw5rfMrcUtGLU";
 	private static final String PLACES_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/search/json?";
 	private static final String PLACES_TEXT_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/search/json?";
 	private static final String PLACES_DETAILS_URL = "https://maps.googleapis.com/maps/api/place/details/json?"; 
@@ -52,10 +52,10 @@ public class PubSearch {
 	private String types;
 
 	private static final String TAG = "PubSearch";
-	private MainActivity main;
+	private PubSearchRequester requester;
 	
-	public PubSearch(MainActivity a) {
-		this.main = a;
+	public PubSearch(PubSearchRequester requester) {
+		this.requester = requester;
 	}
 
 	public void search(Location l, String types) {
@@ -108,7 +108,7 @@ public class PubSearch {
 				l.setLongitude(p.geometry.location.lng);
 				Log.d(TAG, "Nearest pub:"+p.name);
 				Log.d(TAG, "Distance:"+location.distanceTo(l));
-				main.updateNearestPub(p, l, location.distanceTo(l));
+				requester.updateNearestPub(p, l, location.distanceTo(l));
 			}
 		}
 	}
