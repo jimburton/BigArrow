@@ -1,8 +1,12 @@
 package uk.ac.brighton.ci360.bigarrow;
 
+<<<<<<< HEAD:src/uk/ac/brighton/ci360/bigarrow/BigArrowActivity.java
 import java.util.List;
 
 import uk.ac.brighton.ci360.bigarrow.places.Place;
+=======
+import uk.ac.brighton.ci360.bigarrow.places.Place; 
+>>>>>>> 5db8c311ed9f31c8e7e4f841dee4aba9059f932b:src/uk/ac/brighton/ci360/bigarrow/MainActivity.java
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -83,8 +87,12 @@ public class BigArrowActivity extends Activity implements SurfaceHolder.Callback
 			Log.e(TAG, "Failed to connect to camera");
 		}
 
+<<<<<<< HEAD:src/uk/ac/brighton/ci360/bigarrow/BigArrowActivity.java
 		//overlay = (OverlayView) findViewById(R.id.surface_overlay);
 		//overlay.setZOrderMediaOverlay(true);
+=======
+		overlay = (OverlayView) findViewById(R.id.surface_overlay); 
+>>>>>>> 5db8c311ed9f31c8e7e4f841dee4aba9059f932b:src/uk/ac/brighton/ci360/bigarrow/MainActivity.java
 		overlay.getHolder().setFormat(PixelFormat.TRANSLUCENT);
 		overlay.setCamera(camera);
 	}
