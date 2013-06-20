@@ -1,170 +1,229 @@
 package uk.ac.brighton.ci360.bigarrow;
 
-<<<<<<< HEAD:src/uk/ac/brighton/ci360/bigarrow/BigArrowActivity.java
-import java.util.List;
-
 import uk.ac.brighton.ci360.bigarrow.places.Place;
-=======
-import uk.ac.brighton.ci360.bigarrow.places.Place; 
->>>>>>> 5db8c311ed9f31c8e7e4f841dee4aba9059f932b:src/uk/ac/brighton/ci360/bigarrow/MainActivity.java
+import uk.ac.brighton.ci360.bigarrow.places.PlaceDetails;
+import uk.ac.brighton.ci360.bigarrow.places.PlacesList;
 import android.app.Activity;
-import android.content.Context;
-import android.content.res.Configuration;
-import android.graphics.PixelFormat;
 import android.hardware.Camera;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.view.Window;
-import android.view.WindowManager;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.TextView;
 
-public class BigArrowActivity extends Activity implements SurfaceHolder.Callback, 
-															LocationListener, PubSearchRequester {
-
-	private static final String TAG = "BigArrow";
+public class BigArrowActivity extends PlaceSearchActivity {
+	
+	private SurfaceView cameraPreview;
+	private SurfaceHolder previewHolder;
+	private ArrowView arrowView;
 	private Camera camera;
-	private SurfaceView cameraSV;
-	private SurfaceHolder cameraSH;
-	private OverlayView overlay; 
-	private PubSearch pSearch;
-	private final boolean PLACES_SEARCH_ON = true; 
+	private boolean inPreview;
 
-	/* Activity event handlers */
-	// Called when activity is initialised by OS
+	private final static String TAG = "BigArrow";
+	private SensorManager sensorManager;
+
+	private int orientationSensor;
+	private float headingAngle;
+	private float pitchAngle;
+	private float rollAngle;
+
+	private int accelerometerSensor;
+	private float xAxis;
+	private TextView nearestPubLabel;
+	
+	protected SearchType firstSearchType = SearchType.SINGLE;
+
 	@Override
-	public void onCreate(Bundle inst) {
-		super.onCreate(inst);
-
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-				WindowManager.LayoutParams.FLAG_FULLSCREEN);
+	public void onCreate(Bundle savedInstanceState) {
+		firstSearchType = SearchType.SINGLE;
+		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_bigarrow);
-		initCamera();
-		if (PLACES_SEARCH_ON) pSearch = new PubSearch(this);
-		
-		LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-		
-		lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 10000, 50, this);
+
+		sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+		orientationSensor = Sensor.TYPE_ORIENTATION;
+		accelerometerSensor = Sensor.TYPE_ACCELEROMETER;
+		sensorManager.registerListener(sensorEventListener,
+				sensorManager.getDefaultSensor(orientationSensor),
+				SensorManager.SENSOR_DELAY_NORMAL);
+		sensorManager.registerListener(sensorEventListener,
+				sensorManager.getDefaultSensor(accelerometerSensor),
+				SensorManager.SENSOR_DELAY_NORMAL);
+
+		inPreview = false;
+
+		cameraPreview = (SurfaceView) findViewById(R.id.cameraPreview);
+		arrowView = new ArrowView(this);
+		addContentView(arrowView, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+		previewHolder = cameraPreview.getHolder();
+		previewHolder.addCallback(surfaceCallback);
+		previewHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+
+		nearestPubLabel = (TextView) findViewById(R.id.xAxisValue);
+		nearestPubLabel.setText(R.string.bigarrow_searching); 
+	
 	}
 
-	// Called when activity is closed by OS
-	@Override
-	public void onDestroy() {
-		super.onDestroy();
-		// Turn off the camera
-		stopCamera();
-	}
+	final SensorEventListener sensorEventListener = new SensorEventListener() {
+		public void onSensorChanged(SensorEvent sensorEvent) {
+			if (sensorEvent.sensor.getType() == Sensor.TYPE_ORIENTATION) {
+				headingAngle = sensorEvent.values[0];
+				pitchAngle = sensorEvent.values[1];
+				rollAngle = sensorEvent.values[2];
+				
+			    arrowView.updateData(headingAngle);
 
-	/* SurfaceHolder event handlers */
-	// Called when the surface is first created
-	public void surfaceCreated(SurfaceHolder holder) {
-	}
+				// Log.d(TAG, "Heading: " + String.valueOf(headingAngle));
+				// Log.d(TAG, "Pitch: " + String.valueOf(pitchAngle));
+				// Log.d(TAG, "Roll: " + String.valueOf(rollAngle));
 
-	// Called when surface dimensions etc change
-	public void surfaceChanged(SurfaceHolder sh, int format, int width,
-			int height) {
-		// Start camera preview
-		startCamera(sh, width, height);
-	}
+			}
 
-	// Called when the surface is closed/destroyed
-	public void surfaceDestroyed(SurfaceHolder sh) {
-		stopCamera();
-	}
+			else if (sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+				xAxis = sensorEvent.values[0];
 
-	private void initCamera() {
-		//cameraSV = (SurfaceView) findViewById(R.id.surface_camera);
-		cameraSH = cameraSV.getHolder();
-		cameraSH.addCallback(this);
+				// Log.d(TAG, "X Axis: " + String.valueOf(xAxis));
+				// Log.d(TAG, "Y Axis: " +
+				// String.valueOf(sensorEvent.values[1]));
+				// Log.d(TAG, "Z Axis: " +
+				// String.valueOf(sensorEvent.values[2]));
 
-		try {
-			camera = Camera.open();
-		} catch (RuntimeException e) {
-			Log.e(TAG, "Failed to connect to camera");
+				// nearestPubLabel.setText(String.valueOf(xAxis));
+			} 
 		}
 
-<<<<<<< HEAD:src/uk/ac/brighton/ci360/bigarrow/BigArrowActivity.java
-		//overlay = (OverlayView) findViewById(R.id.surface_overlay);
-		//overlay.setZOrderMediaOverlay(true);
-=======
-		overlay = (OverlayView) findViewById(R.id.surface_overlay); 
->>>>>>> 5db8c311ed9f31c8e7e4f841dee4aba9059f932b:src/uk/ac/brighton/ci360/bigarrow/MainActivity.java
-		overlay.getHolder().setFormat(PixelFormat.TRANSLUCENT);
-		overlay.setCamera(camera);
+		public void onAccuracyChanged(Sensor sensor, int accuracy) {
+			// Not used
+		}
+	};
+
+	@Override
+	public void onResume() {
+		super.onResume();
+		sensorManager.registerListener(sensorEventListener,
+				sensorManager.getDefaultSensor(orientationSensor),
+				SensorManager.SENSOR_DELAY_NORMAL);
+		sensorManager.registerListener(sensorEventListener,
+				sensorManager.getDefaultSensor(accelerometerSensor),
+				SensorManager.SENSOR_DELAY_NORMAL);
+		camera = Camera.open();
+		setCameraDisplayOrientation(this, 0, camera);
 	}
 
-	// Setup camera based on surface parameters
+	@Override
+	public void onPause() {
+		if (inPreview) {
+			camera.stopPreview();
+		}
+		sensorManager.unregisterListener(sensorEventListener);
+		camera.release();
+		camera = null;
+		inPreview = false;
 
-	private void startCamera(SurfaceHolder sh, int width, int height) {
-		Camera.Parameters p = camera.getParameters();
-		for (Camera.Size s : p.getSupportedPreviewSizes()) { 
+		super.onPause();
+	}
 
-			p.setPreviewSize(s.width, s.height);
-			overlay.setPreviewSize(s);
+	private Camera.Size getBestPreviewSize(int width, int height,
+			Camera.Parameters parameters) {
+		Camera.Size result = null;
+
+		for (Camera.Size size : parameters.getSupportedPreviewSizes()) {
+			if (size.width <= width && size.height <= height) {
+				if (result == null) {
+					result = size;
+				} else {
+					int resultArea = result.width * result.height;
+					int newArea = size.width * size.height;
+
+					if (newArea > resultArea) {
+						result = size;
+					}
+				}
+			}
+		}
+
+		return (result);
+	}
+
+	public static void setCameraDisplayOrientation(Activity activity,
+			int cameraId, android.hardware.Camera camera) {
+		android.hardware.Camera.CameraInfo info = new android.hardware.Camera.CameraInfo();
+		android.hardware.Camera.getCameraInfo(cameraId, info);
+		int rotation = activity.getWindowManager().getDefaultDisplay()
+				.getRotation();
+		int degrees = 0;
+		switch (rotation) {
+		case Surface.ROTATION_0:
+			degrees = 0;
+			break;
+		case Surface.ROTATION_90:
+			degrees = 90;
+			break;
+		case Surface.ROTATION_180:
+			degrees = 180;
+			break;
+		case Surface.ROTATION_270:
+			degrees = 270;
 			break;
 		}
-		if (this.getResources().getConfiguration().orientation != Configuration.ORIENTATION_LANDSCAPE) {
-			// p.set("orientation", "portrait");
-			// p.setRotation(90);
-			camera.setDisplayOrientation(90);
-		} else {
-			// p.set("orientation", "landscape");
-			// p.setRotation(0);
-			camera.setDisplayOrientation(0);
-		}
-		camera.setParameters(p);
 
-		try {
-			camera.setPreviewDisplay(sh);
-		} catch (Exception e) { // Log surface setting exceptions
-
+		int result;
+		if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+			result = (info.orientation + degrees) % 360;
+			result = (360 - result) % 360; // compensate the mirror
+		} else { // back-facing
+			result = (info.orientation - degrees + 360) % 360;
 		}
-		camera.startPreview();
+		camera.setDisplayOrientation(result);
 	}
 
-	// Stop camera when application ends
-	private void stopCamera() {
-		if (cameraSH != null) {
-			cameraSH.removeCallback(this);
-			cameraSH = null;
+	SurfaceHolder.Callback surfaceCallback = new SurfaceHolder.Callback() {
+		public void surfaceCreated(SurfaceHolder holder) {
+			try {
+				camera.setPreviewDisplay(previewHolder);
+			} catch (Throwable t) {
+				Log.e(TAG, "Exception in setPreviewDisplay()", t);
+			}
 		}
-		if (camera != null) {
-			camera.stopPreview();
-			camera.release();
-			camera = null;
+
+		public void surfaceChanged(SurfaceHolder holder, int format, int width,
+				int height) {
+			Camera.Parameters parameters = camera.getParameters();
+			Camera.Size size = getBestPreviewSize(width, height, parameters);
+
+			if (size != null) {
+				parameters.setPreviewSize(size.width, size.height);
+				camera.setParameters(parameters);
+				camera.startPreview();
+				inPreview = true;
+			}
 		}
-	}
-	
-	private void getNearestPub(Location l) {
-		Log.d(TAG, String.format("lat:%s long:%s", l.getLatitude(), l.getLongitude()));
-		pSearch.search(l, "bar");
-	}
-	
-	public void updateNearestPub(Place p, Location l, float d) {
-		Log.d(TAG, "Nearest pub:"+p.name);
-		Log.d(TAG, "Distance:"+d);
-		overlay.setNearestPub(p);
-		overlay.setDistance(d);
-		overlay.setNpLocation(l);
+
+		public void surfaceDestroyed(SurfaceHolder holder) {
+			// not used
+		}
+
+	};
+
+	@Override
+	public void updateNearestPlace(Place place, Location location, float distance) {
+		nearestPubLabel.setText(place.name);
+		if(!place.id.equals(Place.NO_RESULT)) {
+			nearestPubLabel.append(": " + (int)distance + "m");
+			if (myLocation != null) arrowView.updateData(getAngle(location));
+		}
 	}
 
 	@Override
-	public void onLocationChanged(Location arg0) {
-		if (PLACES_SEARCH_ON) getNearestPub(arg0);
-	}
-
-	@Override
-	public void onProviderDisabled(String provider) {
+	public void updateNearestPlaces(PlacesList places) {
 		// TODO Auto-generated method stub
-	}
 
-	@Override
-	public void onProviderEnabled(String provider) {
-		// TODO Auto-generated method stub
 	}
 
 	@Override
@@ -172,22 +231,18 @@ public class BigArrowActivity extends Activity implements SurfaceHolder.Callback
 		// TODO Auto-generated method stub
 	}
 	
-	@Override
-	public void onPause() {
-		camera.setPreviewCallback(null); 
-		overlay.getHolder().removeCallback(this);
-		camera.release();
+	private float getAngle(Location target) {
+	    float angle = (float) Math.toDegrees(Math.atan2(target.getLongitude() - myLocation.getLongitude(), 
+	    		target.getLatitude() - myLocation.getLatitude()));
+	    if(angle < 0){
+	        angle += 360;
+	    }
+	    return angle;
 	}
 
 	@Override
-	public void updateNearestPubs(List<Place> places) {
+	public void updatePlaceDetails(PlaceDetails details) {
 		// TODO Auto-generated method stub
 		
 	}
-	
-	/*@Override
-	public void onResume() {
-		initCamera();
-	}*/
-	
 }

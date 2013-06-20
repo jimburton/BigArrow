@@ -9,6 +9,11 @@ import com.google.api.client.util.Key;
 * Otherwise you can't pass to another actitivy
 * */
 public class PlaceDetails implements Serializable {
+
+	private static final long serialVersionUID = 1L;
+
+	public static String KEY_REFERENCE = "reference";
+    public static String KEY_NAME = "name";
  
     @Key
     public String status;

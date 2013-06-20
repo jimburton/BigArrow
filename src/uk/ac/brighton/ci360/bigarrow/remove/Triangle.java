@@ -1,8 +1,8 @@
-package uk.ac.brighton.ci360.bigarrow;
+package uk.ac.brighton.ci360.bigarrow.remove;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
+import java.nio.FloatBuffer; 
 
 import javax.microedition.khronos.opengles.GL10;
 

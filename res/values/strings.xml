@@ -21,6 +21,9 @@
     <string name="title_bigarrow_activity">BigArrow</string>
     <string name="bigarrow_searching">Searching</string>
     
+    <string name="title_bigarrow_prefs_activity">BigArrow Preferences</string>
+    <string name="title_placedetail_activity">BigArrow Preferences</string>
+    
     
     <string name="list_button_label">List</string>
     <string name="title_mylist_activity">List</string>

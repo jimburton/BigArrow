@@ -40,7 +40,7 @@ public class HomePageActivity extends Activity {
 		Intent i;
 		switch(v.getId()) {
 		case R.id.bigarrow_button:
-			i = new Intent(this, BigArrowPAARActivity.class);
+			i = new Intent(this, BigArrowActivity.class);
 			startActivity(i);
 			break;
 		case R.id.list_button:
@@ -48,7 +48,7 @@ public class HomePageActivity extends Activity {
 			startActivity(i);
 			break;
 		case R.id.map_button:
-			i = new Intent(this, MapActivity.class);
+			i = new Intent(this, MyMapActivity.class);
 			startActivity(i);
 			break;
 		}

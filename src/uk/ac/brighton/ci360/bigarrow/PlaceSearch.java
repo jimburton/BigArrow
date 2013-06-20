@@ -24,7 +24,10 @@ import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.impl.client.DefaultHttpClient;
 
+import uk.ac.brighton.ci360.bigarrow.PlaceSearchRequester.SearchEstab;
+import uk.ac.brighton.ci360.bigarrow.PlaceSearchRequester.SearchType;
 import uk.ac.brighton.ci360.bigarrow.places.Place;
+import uk.ac.brighton.ci360.bigarrow.places.PlaceDetails;
 import uk.ac.brighton.ci360.bigarrow.places.PlacesList;
 import android.location.Location;
 import android.os.AsyncTask;
@@ -40,34 +43,49 @@ import com.google.api.client.http.apache.ApacheHttpTransport;
 import com.google.api.client.http.json.JsonHttpParser;
 import com.google.api.client.json.jackson.JacksonFactory;
 
-public class PubSearch {
+public class PlaceSearch {
 
 	// Google API Key
-	private static final String API_KEY = "AIzaSyAP8HSy-2r57WhvO8KcmEdw5rfMrcUtGLU";
+	private static final String API_KEY = "AIzaSyB9p8Ht5Zom6zKKtpD8U3VB2pYMzAeuv1E";
+	private static final String API_KEY_ANDROID = "AIzaSyBjgeJCRGi0nnHQeeKtscWg7jt1yFIOMT8";
 	private static final String PLACES_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/search/json?";
 	private static final String PLACES_TEXT_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/search/json?";
-	private static final String PLACES_DETAILS_URL = "https://maps.googleapis.com/maps/api/place/details/json?"; 
+	private static final String PLACES_DETAILS_URL = "https://maps.googleapis.com/maps/api/place/details/json?";
 
 	private Location location;
-	private String types;
+	private String estabType;
+	private String detailsReference;
+	private SearchType searchType;
 
 	private static final String TAG = "PubSearch";
-	private PubSearchRequester requester;
-	
-	public PubSearch(PubSearchRequester requester) {
+	private PlaceSearchRequester requester;
+
+	public PlaceSearch(PlaceSearchRequester requester) {
 		this.requester = requester;
 	}
 
-	public void search(Location l, String types) {
-
+	public void search(Location l, SearchEstab[] estabs, SearchType searchType) {
 		this.location = l;
-		this.types = types;
-		new PubSearchTask().execute();
-
+		StringBuffer estabsStr = new StringBuffer();
+		int i = 0;
+		for (; i < estabs.length - 1; i++) {
+			estabsStr.append(estabs[i].label());
+			estabsStr.append(",");
+		}
+		estabsStr.append(estabs[i]);
+		this.estabType = estabsStr.toString();
+		this.searchType = searchType;
+		new PlaceSearchTask().execute();
+	}
+	
+	public void getDetail(String reference) {
+		this.detailsReference = reference;
+		this.searchType = SearchType.DETAIL;
+		new PlaceDetailsTask().execute();
 	}
 
-	class PubSearchTask extends AsyncTask<String, Void, PlacesList> {
-
+	class PlaceSearchTask extends AsyncTask<String, Void, PlacesList> {
+		final SearchType st = searchType;
 		protected PlacesList doInBackground(String... urls) {
 			PlacesList places = new PlacesList();
 			BufferedReader in = null;
@@ -76,13 +94,14 @@ public class PubSearch {
 				HttpRequestFactory httpRequestFactory = createRequestFactory(transport);
 				HttpRequest request = httpRequestFactory
 						.buildGetRequest(new GenericUrl(PLACES_SEARCH_URL));
-				//request.getUrl().setPort(443);
+				// request.getUrl().setPort(443);
 				request.getUrl().put("key", API_KEY);
-				request.getUrl().put("location", location.getLatitude() + "," + location.getLongitude());
+				request.getUrl().put("location",
+						location.getLatitude() + "," + location.getLongitude());
 				request.getUrl().put("rankby", "distance"); // in meters
 				request.getUrl().put("sensor", "true");
-				if (types != null)
-					request.getUrl().put("types", types);
+				if (estabType != null)
+					request.getUrl().put("types", estabType.toLowerCase());
 				Log.d(TAG, request.getUrl().toString());
 				places = request.execute().parseAs(PlacesList.class);
 				// Check log cat for places response status
@@ -90,9 +109,10 @@ public class PubSearch {
 				return places;
 			} catch (HttpResponseException e) {
 				Log.e("Error:", e.getMessage());
+				returnNoResult();
 				return null;
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				returnNoResult();
 				e.printStackTrace();
 				return null;
 			}
@@ -100,16 +120,85 @@ public class PubSearch {
 
 		protected void onPostExecute(PlacesList places) {
 			Log.d(TAG, "AsyncTask is done");
-			Log.d(TAG, "places is null?: "+(places == null));
+			Log.d(TAG, "SearchType: " + searchType);
 			if (places != null && places.results != null) {
-				Place p = places.results.get(0);
-				Location l = new Location(p.name);
-				l.setLatitude(p.geometry.location.lat);
-				l.setLongitude(p.geometry.location.lng);
-				Log.d(TAG, "Nearest pub:"+p.name);
-				Log.d(TAG, "Distance:"+location.distanceTo(l));
-				requester.updateNearestPub(p, l, location.distanceTo(l));
+				if (places.results.size() > 0) {
+					if (this.st == SearchType.MANY) {
+						requester.updateNearestPlaces(places);
+					} else {
+						Place p = places.results.get(0);
+						Location l = new Location(p.name);
+						l.setLatitude(p.geometry.location.lat);
+						l.setLongitude(p.geometry.location.lng);
+						Log.d(TAG, "Nearest pub:" + p.name);
+						Log.d(TAG, "Distance:" + location.distanceTo(l));
+						requester.updateNearestPlace(p, l,
+								location.distanceTo(l));
+					}
+				} else {
+					returnNoResult();
+				}
+			} else {
+				returnNoResult();
 			}
+		}
+	}
+
+	class PlaceDetailsTask extends AsyncTask<String, Void, PlaceDetails> {
+
+		protected PlaceDetails doInBackground(String... urls) {
+			PlaceDetails details = new PlaceDetails();
+			BufferedReader in = null;
+			try {
+				HttpTransport transport = new ApacheHttpTransport();
+				HttpRequestFactory httpRequestFactory = createRequestFactory(transport);
+				HttpRequest request = httpRequestFactory
+						.buildGetRequest(new GenericUrl(PLACES_DETAILS_URL));
+				// request.getUrl().setPort(443);
+				request.getUrl().put("key", API_KEY);
+				request.getUrl().put("reference", detailsReference);
+				request.getUrl().put("sensor", "true");
+				Log.d(TAG, request.getUrl().toString());
+				details = request.execute().parseAs(PlaceDetails.class);
+				// Check log cat for places response status
+				Log.d(TAG, "" + details.status);
+				return details;
+			} catch (HttpResponseException e) {
+				Log.e("Error:", e.getMessage());
+				returnNoResult();
+				return null;
+			} catch (IOException e) {
+				returnNoResult();
+				e.printStackTrace();
+				return null;
+			}
+		}
+
+		protected void onPostExecute(PlaceDetails details) {
+			Log.d(TAG, "AsyncTask is done");
+			Log.d(TAG, "places is null?: " + (details == null));
+			if (details != null) {
+				requester.updatePlaceDetails(details);
+			} else {
+				returnNoResult();
+			}
+		}
+	}
+
+	public void getPlaceDetails(String reference) throws Exception {
+		detailsReference = reference;
+		new PlaceDetailsTask().execute();
+	}
+
+	private void returnNoResult() {
+		Log.d(TAG, "NO RESULT");
+		if (searchType == SearchType.MANY) {
+			requester.updateNearestPlaces(new PlacesList());
+		} else {
+			Place p = new Place();
+			p.name = "No results";
+			p.id = Place.NO_RESULT;
+			requester.updateNearestPlace(p, null, 0f);
 		}
 	}
 

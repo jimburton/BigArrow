@@ -1,4 +1,4 @@
-package uk.ac.brighton.ci360.bigarrow;
+package uk.ac.brighton.ci360.bigarrow.remove;
 
 import uk.ac.brighton.ci360.bigarrow.places.Place;
 import android.content.Context;

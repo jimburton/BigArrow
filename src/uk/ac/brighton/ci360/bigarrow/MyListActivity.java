@@ -1,61 +1,125 @@
 package uk.ac.brighton.ci360.bigarrow;
 
-import android.app.ListActivity;
-import android.app.LoaderManager;
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import uk.ac.brighton.ci360.bigarrow.places.Place;
+import uk.ac.brighton.ci360.bigarrow.places.PlaceDetails;
+import uk.ac.brighton.ci360.bigarrow.places.PlacesList;
+import android.app.ProgressDialog;
 import android.content.Intent;
-import android.content.Loader;
-import android.database.Cursor;
+import android.location.Location;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.Button;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
+import android.widget.SimpleAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
-/*
- * This app provides an example of connecting to a ContentProvider and binding it to a ListActivity.
- * Before installing, install the corresponding ContentProvider, uk.ac.brighton.ci360.notesclientprovider.
- */
-public class MyListActivity extends ListActivity {
 
-	private static final String TAG = "NotesClient";
+public class MyListActivity extends PlaceSearchActivity {
+
+	private static final String TAG = "MyListActivity";
+	ArrayList<HashMap<String, String>> placesListItems = new ArrayList<HashMap<String,String>>();
+    ListView lv;
+	private ProgressDialog pDialog;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		firstSearchType = SearchType.MANY;
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_mylist);
 		
-		/*helper = new NotesProviderHelper(this);
-		Cursor notes = helper.getNotesCursor();
+		pDialog = new ProgressDialog(MyListActivity.this);
+		pDialog.setMessage("Loading details ...");
+		pDialog.setIndeterminate(false);
+		pDialog.setCancelable(false);
+		pDialog.show();
 
-		String[] projection = { NotesProviderHelper.NOTES_ID, NotesProviderHelper.NOTES_TITLE };
-		int[] to = new int[] { R.id.id_txt, R.id.title_text };
-		// since v3 we should use LoaderManager and CursorLoader to avoid doing this in the UI
-		// thread. See http://developer.android.com/guide/components/loaders.html
-		@SuppressWarnings("deprecation")
-		
-		SimpleCursorAdapter sca = new SimpleCursorAdapter(this, R.layout.list_row,
-				notes, projection, to);
-		setListAdapter(sca);*/
-
-	}
-
-	@Override
-	protected void onListItemClick(ListView l, View v, int position, long id) {
-		super.onListItemClick(l, v, position, id);
-		TextView tv = (TextView) v.findViewById(R.id.id_txt);
-		long pubid = Long.parseLong(tv.getText().toString());
-		Intent i = new Intent(this, MapActivity.class);
-		i.putExtra(MapActivity.EXTRA_PUBID, pubid);
-		startActivity(i);
+		lv = (ListView)findViewById(R.id.list_view);
+		//lv.setAdapter(adapter);
+		lv.setOnItemClickListener(new OnItemClickListener()
+		{
+			@Override
+            public void onItemClick(AdapterView<?> parent, View view,
+                    int position, long id) {
+                String reference = ((TextView) view.findViewById(R.id.id_reference)).getText().toString();
+                Log.d(TAG, reference);
+                Intent in = new Intent(getApplicationContext(), PlaceDetailActivity.class);
+                in.putExtra(PlaceDetails.KEY_REFERENCE, reference);
+                startActivity(in);
+            }
+		});
 	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.menu, menu);
 		return true;
+	}
+
+	@Override
+	public void updateNearestPlace(Place place, Location location, float distance) {
+		// TODO Auto-generated method stub
+		Log.d(TAG, "updateNearestPlaces");
+	}
+
+	@Override
+	public void updateNearestPlaces(PlacesList places) {
+		pDialog.dismiss();
+		Log.d(TAG, "Got "+places.results.size()+" places to show in list");
+		if (places.results != null) {
+            // loop through each place
+            for (Place p : places.results) {
+                HashMap<String, String> map = new HashMap<String, String>();
+                map.put(PlaceDetails.KEY_REFERENCE, p.reference);
+                map.put(PlaceDetails.KEY_NAME, p.name);
+                placesListItems.add(map);
+            }
+            // list adapter
+            ListAdapter adapter = new SimpleAdapter(MyListActivity.this, placesListItems,
+                    R.layout.list_row,
+                    new String[] { PlaceDetails.KEY_REFERENCE, PlaceDetails.KEY_NAME}, new int[] {
+                            R.id.id_reference, R.id.id_name });
+             
+            // Adding data into listview
+            lv.setAdapter(adapter);
+        }
+		
+	}
+
+	@Override
+	public void onLocationChanged(Location arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onProviderDisabled(String provider) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onProviderEnabled(String provider) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onStatusChanged(String provider, int status, Bundle extras) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void updatePlaceDetails(PlaceDetails details) {
+		// TODO Auto-generated method stub
+		
 	}
 }

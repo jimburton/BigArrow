@@ -9,6 +9,8 @@ import com.google.api.client.util.Key;
  * Object to another using Intents Otherwise you can't pass to another actitivy
  * */
 public class Place implements Serializable {
+	
+	public final static String NO_RESULT = "NO_RESULT";
 
 	@Key
 	public String id;

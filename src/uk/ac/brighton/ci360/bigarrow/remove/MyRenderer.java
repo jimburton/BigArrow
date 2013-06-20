@@ -1,4 +1,4 @@
-package uk.ac.brighton.ci360.bigarrow;
+package uk.ac.brighton.ci360.bigarrow.remove;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;

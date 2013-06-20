@@ -41,7 +41,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".BigArrowPAARActivity"
+            android:name=".BigArrowActivity"
             android:label="@string/title_bigarrow_activity" 
             android:screenOrientation = "portrait"
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
@@ -52,8 +52,16 @@
             android:label="@string/title_mylist_activity" >
         </activity>
         <activity
-            android:name=".MapActivity"
+            android:name=".PlaceDetailActivity"
+            android:label="@string/title_placedetail_activity" >
+        </activity>
+        <activity
+            android:name=".MyMapActivity"
             android:label="@string/title_map_activity" >
+        </activity>
+        <activity
+            android:name=".Prefs"
+            android:label="@string/title_bigarrow_prefs_activity" >
         </activity>
         
         <activity android:name="com.google.android.gms.maps.MapFragment" />
