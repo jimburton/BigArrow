@@ -11,6 +11,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Properties;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -45,13 +46,6 @@ import com.google.api.client.json.jackson.JacksonFactory;
 
 public class PlaceSearch {
 
-	// Google API Key
-	private static final String API_KEY = "AIzaSyB9p8Ht5Zom6zKKtpD8U3VB2pYMzAeuv1E";
-	private static final String API_KEY_ANDROID = "AIzaSyBjgeJCRGi0nnHQeeKtscWg7jt1yFIOMT8";
-	private static final String PLACES_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/search/json?";
-	private static final String PLACES_TEXT_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/search/json?";
-	private static final String PLACES_DETAILS_URL = "https://maps.googleapis.com/maps/api/place/details/json?";
-
 	private Location location;
 	private String estabType;
 	private String detailsReference;
@@ -59,9 +53,23 @@ public class PlaceSearch {
 
 	private static final String TAG = "PubSearch";
 	private PlaceSearchRequester requester;
+	private String apiKey;
+	private String placesSearchURL;
+	private String placesDetailsURL;
 
 	public PlaceSearch(PlaceSearchRequester requester) {
 		this.requester = requester;
+		Properties prop = new Properties();
+		 
+    	try {
+    		prop.load(PlaceSearch.class.getClassLoader().getResourceAsStream("config.properties"));
+            apiKey = prop.getProperty("apikey_places");
+            placesSearchURL = prop.getProperty("places_endpoint_search");
+            placesDetailsURL = prop.getProperty("places_endpoint_details");
+            Log.d(TAG, apiKey);
+    	} catch (IOException ex) {
+    		ex.printStackTrace();
+        }
 	}
 
 	public void search(Location l, SearchEstab[] estabs, SearchType searchType) {
@@ -93,9 +101,9 @@ public class PlaceSearch {
 				HttpTransport transport = new ApacheHttpTransport();
 				HttpRequestFactory httpRequestFactory = createRequestFactory(transport);
 				HttpRequest request = httpRequestFactory
-						.buildGetRequest(new GenericUrl(PLACES_SEARCH_URL));
+						.buildGetRequest(new GenericUrl(placesSearchURL));
 				// request.getUrl().setPort(443);
-				request.getUrl().put("key", API_KEY);
+				request.getUrl().put("key", apiKey);
 				request.getUrl().put("location",
 						location.getLatitude() + "," + location.getLongitude());
 				request.getUrl().put("rankby", "distance"); // in meters
@@ -153,9 +161,9 @@ public class PlaceSearch {
 				HttpTransport transport = new ApacheHttpTransport();
 				HttpRequestFactory httpRequestFactory = createRequestFactory(transport);
 				HttpRequest request = httpRequestFactory
-						.buildGetRequest(new GenericUrl(PLACES_DETAILS_URL));
+						.buildGetRequest(new GenericUrl(placesDetailsURL));
 				// request.getUrl().setPort(443);
-				request.getUrl().put("key", API_KEY);
+				request.getUrl().put("key", apiKey);
 				request.getUrl().put("reference", detailsReference);
 				request.getUrl().put("sensor", "true");
 				Log.d(TAG, request.getUrl().toString());
