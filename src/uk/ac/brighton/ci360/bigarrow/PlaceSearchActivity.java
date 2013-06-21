@@ -28,6 +28,10 @@ public abstract class PlaceSearchActivity extends Activity implements
 			locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 			myLocation = locationManager
 					.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+			if (myLocation == null) {
+				myLocation = locationManager
+						.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+			}
 			locationManager.requestLocationUpdates(
 					LocationManager.GPS_PROVIDER, 10000, 50, this);
 			if(firstSearchType == SearchType.DETAIL) {

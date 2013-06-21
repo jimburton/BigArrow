@@ -1,4 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
+<fragment xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:map="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/map"
+    android:name="com.google.android.gms.maps.MapFragment"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    map:cameraTilt="30"
+    map:cameraZoom="13"
+    map:mapType="normal"
+    map:uiCompass="true"
+    map:uiRotateGestures="true"
+    map:uiScrollGestures="true"
+    map:uiTiltGestures="true"
+    map:uiZoomControls="true"
+    map:uiZoomGestures="true" />
+<!--
 <com.google.android.maps.MapView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/mapView"
@@ -7,3 +23,4 @@
     android:clickable="true"
     android:apiKey="AIzaSyAP8HSy-2r57WhvO8KcmEdw5rfMrcUtGLU"
 />
+-->
