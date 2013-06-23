@@ -17,7 +17,8 @@
  		android:layout_centerHorizontal="true"
  		android:textColor="#000"
  		android:textSize="30sp"
-	    android:text="@string/empty" />
+	    android:text="@string/empty" 
+	    android:background="@color/color_bigarrow_bg" />
 
 </RelativeLayout>
 <!-- <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"

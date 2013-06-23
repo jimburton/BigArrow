@@ -33,7 +33,7 @@ public abstract class PlaceSearchActivity extends Activity implements
 						.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 			}
 			locationManager.requestLocationUpdates(
-					LocationManager.GPS_PROVIDER, 10000, 50, this);
+					LocationManager.GPS_PROVIDER, 10000, 10, this);
 			if(firstSearchType == SearchType.DETAIL) {
 				getDetail();
 			} else {
