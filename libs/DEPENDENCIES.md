@@ -12,6 +12,7 @@ Most of these are available in the [google-api-java-client](http://code.google.c
 + google-api-client-googleapis-1.4.1-beta.jar
 + google-http-client-1.5.0-beta.jar
 + google-oauth-client-1.14.1-beta.jar
++ google-play-services.jar
 + httpclient-4.2.5.jar
 + httpcore-4.2.4.jar                          
 + jackson-core-2.1.3.jar
