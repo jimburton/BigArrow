@@ -122,7 +122,13 @@ public class MyMapActivity extends PlaceSearchActivity implements LocationListen
 			for (Place place : places.results) {
 				ll = new LatLng(place.geometry.location.lat,
 						place.geometry.location.lng); // longitude
-				mOpt = new MarkerOptions().position(ll).title(place.name)
+				
+				Location pub = new Location("");
+				pub.setLatitude(ll.latitude);
+				pub.setLongitude(ll.longitude);
+				String dist = String.format(" (%.2f%s)", myLocation.distanceTo(pub), " m");
+				
+				mOpt = new MarkerOptions().position(ll).title(place.name + dist)
 						.icon(bmd);
 				map.addMarker(mOpt);
 				llbBuilder.include(ll);
