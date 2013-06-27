@@ -1,15 +1,16 @@
 package uk.ac.brighton.ci360.bigarrow;
 
+import java.util.HashMap;
 import java.util.List;
 
 import uk.ac.brighton.ci360.bigarrow.places.Place;
 import uk.ac.brighton.ci360.bigarrow.places.PlaceDetails;
 import uk.ac.brighton.ci360.bigarrow.places.PlacesList;
+import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.util.Log;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -47,6 +48,13 @@ public class MyMapActivity extends PlaceSearchActivity implements LocationListen
 	private GoogleMap map;
 	private LatLngBounds.Builder llbBuilder;
 	private PlaceSearch pSearch;
+	
+	/**
+	 * If we won't be needing that much info in the future, I will restrict it with <Marker, String>
+	 * According to HashMap keys they'll be overwritten when using new places
+	 * Still need to check with new markers/places in theory should work
+	 */
+	private HashMap<Marker, Place> markerPlace = new HashMap<Marker, Place>();
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -79,7 +87,10 @@ public class MyMapActivity extends PlaceSearchActivity implements LocationListen
 		map.setOnInfoWindowClickListener(new OnInfoWindowClickListener() {
 			@Override
 			public void onInfoWindowClick(Marker marker) {
-				Log.d(TAG, marker.getTitle());
+				String reference = markerPlace.get(marker).reference;
+				Intent in = new Intent(getApplicationContext(), PlaceDetailActivity.class);
+                in.putExtra(PlaceDetails.KEY_REFERENCE, reference);
+                startActivity(in);
 			}
 		});
 
@@ -104,7 +115,6 @@ public class MyMapActivity extends PlaceSearchActivity implements LocationListen
 	public void updateNearestPlace(Place place, Location location,
 			float distance) {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
@@ -128,7 +138,7 @@ public class MyMapActivity extends PlaceSearchActivity implements LocationListen
 				mOpt = new MarkerOptions().position(ll)
 						.title(place.name + String.format(" (%.2f m)", place.distanceTo(myLocation)))
 						.icon(bmd);
-				map.addMarker(mOpt);
+				markerPlace.put(map.addMarker(mOpt), place);
 				llbBuilder.include(ll);
 			}
 			map.animateCamera(CameraUpdateFactory.newLatLngBounds(llbBuilder.build(), 20));
