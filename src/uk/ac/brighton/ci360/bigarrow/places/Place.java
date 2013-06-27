@@ -27,6 +27,10 @@ public class Place implements Serializable {
 	@Key
 	public String vicinity;
 
+	/**Careful, the array might be NULL if a place has no photos**/
+	@Key
+	public Photo[] photos;
+	
 	@Key
 	public Geometry geometry;
 
@@ -44,6 +48,20 @@ public class Place implements Serializable {
 	public static class Geometry implements Serializable {
 		@Key
 		public Location location;
+	}
+	
+	public static class Photo implements Serializable {
+		@Key
+		public int height;
+		
+		@Key
+		public String[] html_attributions;
+		
+		@Key
+		public String photo_reference;
+		
+		@Key
+		public int width;
 	}
 
 	public static class Location implements Serializable {
