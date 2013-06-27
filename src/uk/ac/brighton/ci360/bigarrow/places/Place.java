@@ -1,7 +1,7 @@
 package uk.ac.brighton.ci360.bigarrow.places;
 
 import java.io.Serializable;
-
+import com.google.android.gms.maps.model.LatLng;
 import com.google.api.client.util.Key;
 
 /**
@@ -39,7 +39,29 @@ public class Place implements Serializable {
 
 	@Key
 	public String formatted_phone_number;
+	
+	/**
+	 * @return a pair of latitude and longitude coordinates of this place
+	 */
+	public LatLng getLatLng() {
+		return new LatLng(geometry.location.lat, geometry.location.lng);
+	}
 
+	/**
+	 * Since we have defined our on location I had to use
+	 * android.location.Location. Once I really get into it
+	 * I will probably replace the inner class with something different
+	 * to demystify the code
+	 * @param location - location to which you need to know the distance
+	 * @return a distance in meters to the given location
+	 */
+	public float distanceTo(android.location.Location location) {
+		android.location.Location thisPlaceLocation = new android.location.Location("");
+		thisPlaceLocation.setLatitude(geometry.location.lat);
+		thisPlaceLocation.setLongitude(geometry.location.lng);
+		return thisPlaceLocation.distanceTo(location);
+	}
+	
 	@Override
 	public String toString() {
 		return name + " - " + id + " - " + reference;
