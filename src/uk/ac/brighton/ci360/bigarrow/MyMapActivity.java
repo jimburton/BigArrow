@@ -1,5 +1,3 @@
-//this is just a test comment, will be deleted
-
 package uk.ac.brighton.ci360.bigarrow;
 
 import java.util.List;
@@ -65,6 +63,10 @@ public class MyMapActivity extends Activity implements LocationListener,
 		}
 		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
 				10000, 50, this);
+				
+				
+		/**IF GPS DISABLED myLocation is still null and app will crash**/		
+		
 		myLatLng = new LatLng(myLocation.getLatitude(),
 				myLocation.getLongitude());
 
