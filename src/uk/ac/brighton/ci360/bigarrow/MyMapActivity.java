@@ -63,6 +63,10 @@ public class MyMapActivity extends PlaceSearchActivity implements LocationListen
 		}
 		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
 				10000, 50, this);
+				
+				
+		/**IF GPS DISABLED myLocation is still null and app will crash**/		
+		
 		myLatLng = new LatLng(myLocation.getLatitude(),
 				myLocation.getLongitude());
 
