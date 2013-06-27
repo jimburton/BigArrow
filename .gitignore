@@ -5,3 +5,6 @@
 *.jar
 *.war
 *.ear
+
+# Mac OS X hidden file #
+.DS_Store
