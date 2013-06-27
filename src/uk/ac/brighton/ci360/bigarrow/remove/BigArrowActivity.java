@@ -2,6 +2,7 @@ package uk.ac.brighton.ci360.bigarrow.remove;
 
 import uk.ac.brighton.ci360.bigarrow.PlaceSearch;
 import uk.ac.brighton.ci360.bigarrow.PlaceSearchRequester;
+import uk.ac.brighton.ci360.bigarrow.Prefs;
 import uk.ac.brighton.ci360.bigarrow.R;
 import uk.ac.brighton.ci360.bigarrow.places.Place;
 import uk.ac.brighton.ci360.bigarrow.places.PlaceDetails;
@@ -136,7 +137,8 @@ public class BigArrowActivity extends Activity implements SurfaceHolder.Callback
 	
 	private void getNearestPub(Location l) {
 		Log.d(TAG, String.format("lat:%s long:%s", l.getLatitude(), l.getLongitude()));
-		pSearch.search(l, new SearchEstab[]{SearchEstab.BAR}, SearchType.SINGLE); 
+		SearchEstab e = Prefs.getSearchType(this);
+		pSearch.search(l, new SearchEstab[]{ e }, SearchType.SINGLE); 
 	}
 	
 	public void updateNearestPub(Place p, Location l, float d) {

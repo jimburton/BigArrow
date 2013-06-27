@@ -9,8 +9,20 @@ public interface PlaceSearchRequester {
 	public static enum SearchType {
 		SINGLE, MANY, DETAIL
 	}
+	public static final String LABEL_BAR = "bar";
+	public static final String LABEL_ATM = "atm";
+	public static final String LABEL_CAFE = "cafe";
+	public static final String LABEL_MOVIE_THEATER = "movie_theater";
+	public static final String LABEL_RESTAURANT = "restaurant";
+	public static final String LABEL_TAXI_STAND = "taxi_stand";
+	
 	public static enum SearchEstab {
-		BAR("bar");
+		BAR(LABEL_BAR), 
+		ATM(LABEL_ATM), 
+		CAFE(LABEL_CAFE), 
+		MOVIE_THEATER(LABEL_MOVIE_THEATER), 
+		RESTAURANT(LABEL_RESTAURANT), 
+		TAXI_STAND(LABEL_TAXI_STAND);
 		private String label;
 		private SearchEstab(String label) {
 			this.label = label;

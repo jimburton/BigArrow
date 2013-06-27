@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen
   xmlns:android="http://schemas.android.com/apk/res/android">
-  <CheckBoxPreference 
-  	android:key="music"
-  	android:title="@string/music_title"
-  	android:summary="@string/music_text"
-  	android:defaultValue="true"/>
-  <CheckBoxPreference 
-  	android:key="hints"
-  	android:title="@string/hints_title"
-  	android:summary="@string/hints_text"
-  	android:defaultValue="true"/>  
+  <PreferenceCategory android:title="General Settings">
+        <ListPreference 
+            android:entries="@array/pref_search_type_entries" 
+            android:title="Search Type" android:key="pref_search_type" 
+            android:entryValues="@array/pref_search_type_values" 
+            android:summary="Select the type of place you want to search for" 
+            android:defaultValue="bar" />
+    </PreferenceCategory> 
 </PreferenceScreen>

@@ -19,10 +19,14 @@ public abstract class PlaceSearchActivity extends Activity implements
 
 	protected SearchType firstSearchType;
 	protected String placeReference;
+	protected SearchEstab estab;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		estab = Prefs.getSearchType(this);
+		String estabStr = getReadableLabel(estab);
+		setTitle("Nearest " + estabStr);
 		if (PLACES_SEARCH_ON) {
 			pSearch = new PlaceSearch(this);
 			locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
@@ -79,7 +83,7 @@ public abstract class PlaceSearchActivity extends Activity implements
 
 	private void getNearest() {
 		if (myLocation != null) {
-		  pSearch.search(myLocation, new SearchEstab[] { SearchEstab.BAR }, firstSearchType);
+		  pSearch.search(myLocation, new SearchEstab[] { estab }, firstSearchType);
 		}	
 	}
 	
@@ -93,5 +97,24 @@ public abstract class PlaceSearchActivity extends Activity implements
 	@Override
 	public abstract void updateNearestPlace(Place place, Location location,
 			float distance);
+	
+	public String getReadableLabel(SearchEstab estab) {
+		String label = estab.label();
+		String res = null;
+		if(label.equals(LABEL_BAR)) {
+			res = getResources().getString(R.string.readable_label_bar); 
+		} else if (label.equals(LABEL_ATM)) {
+			res = getResources().getString(R.string.readable_label_atm);
+		} else if (label.equals(LABEL_CAFE)) {
+			res = getResources().getString(R.string.readable_label_cafe);
+		} else if (label.equals(LABEL_MOVIE_THEATER)) {
+			res = getResources().getString(R.string.readable_label_movie_theater);
+		} else if (label.equals(LABEL_RESTAURANT)) {
+			res = getResources().getString(R.string.readable_label_restaurant);
+		} else if (label.equals(LABEL_TAXI_STAND)) {
+			res = getResources().getString(R.string.readable_label_taxi_stand);
+		}
+		return res;
+	}
 
 }

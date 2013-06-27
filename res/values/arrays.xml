@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="pref_search_type_entries">        
+        <item>Cash machine</item>
+        <item>Bar</item>
+        <item>Cafe</item>
+        <item>Cinema</item>
+        <item>Restaurant</item>
+        <item>Taxi rank</item>
+    </string-array>
+    <string-array name="pref_search_type_values">        
+        <item>atm</item>
+        <item>bar</item>
+        <item>cafe</item>
+        <item>movie_theater</item>
+        <item>restaurant</item>
+        <item>taxi_stand</item>
+    </string-array>
+</resources>

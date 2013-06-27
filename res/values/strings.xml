@@ -33,6 +33,20 @@
     
     <string name="xAxis">X Axis:</string>
 	<string name="empty"></string>
+	
+	<string name="label_bar">bar</string>
+	<string name="label_atm">atm</string>
+	<string name="label_cafe">cafe</string>
+	<string name="label_movie_theater">movie_theater</string>
+	<string name="label_restaurant">restaurant</string>
+	<string name="label_taxi_stand">taxi_stand</string>
+	
+	<string name="readable_label_bar">bar</string>
+	<string name="readable_label_atm">cash machine</string>
+	<string name="readable_label_cafe">cafe</string>
+	<string name="readable_label_movie_theater">cinema</string>
+	<string name="readable_label_restaurant">restaurant</string>
+	<string name="readable_label_taxi_stand">taxi rank</string>
     
 
 </resources>

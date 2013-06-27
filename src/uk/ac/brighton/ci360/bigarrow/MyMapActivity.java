@@ -27,7 +27,7 @@ import com.google.android.maps.MapController;
 import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
 
-public class MyMapActivity extends Activity implements LocationListener,
+public class MyMapActivity extends PlaceSearchActivity implements LocationListener,
 		PlaceSearchRequester {
 
 	protected static final String TAG = null;
@@ -77,7 +77,8 @@ public class MyMapActivity extends Activity implements LocationListener,
 		});
 
 		pSearch = new PlaceSearch(this);
-		pSearch.search(myLocation, new SearchEstab[] { SearchEstab.BAR },
+		SearchEstab e = Prefs.getSearchType(this);
+		pSearch.search(myLocation, new SearchEstab[] { e },
 				SearchType.MANY);
 
 	}
@@ -137,7 +138,9 @@ public class MyMapActivity extends Activity implements LocationListener,
 	@Override
 	public void onLocationChanged(Location location) {
 		myLatLng = new LatLng(location.getLatitude(), location.getLongitude());
-		pSearch.search(myLocation, new SearchEstab[] { SearchEstab.BAR },
+		SearchEstab e = Prefs.getSearchType(this);
+		//This needs to be done relative to the bounds of the map
+		pSearch.search(myLocation, new SearchEstab[] { e },
 				SearchType.MANY);
 	}
 
