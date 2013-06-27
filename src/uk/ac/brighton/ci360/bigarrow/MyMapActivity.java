@@ -5,7 +5,6 @@ import java.util.List;
 import uk.ac.brighton.ci360.bigarrow.places.Place;
 import uk.ac.brighton.ci360.bigarrow.places.PlaceDetails;
 import uk.ac.brighton.ci360.bigarrow.places.PlacesList;
-import android.app.Activity;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -115,26 +114,20 @@ public class MyMapActivity extends PlaceSearchActivity implements LocationListen
 		myMarker = map.addMarker(mOpt);
 		BitmapDescriptor bmd = BitmapDescriptorFactory
 				.fromResource(R.drawable.mark_blue);
+		
 		if (places.results != null) {
 			// loop through all the places
 			llbBuilder = new LatLngBounds.Builder();
 			llbBuilder.include(myLatLng);
 			for (Place place : places.results) {
-				ll = new LatLng(place.geometry.location.lat,
-						place.geometry.location.lng); // longitude
-				
-				Location pub = new Location("");
-				pub.setLatitude(ll.latitude);
-				pub.setLongitude(ll.longitude);
-				String dist = String.format(" (%.2f%s)", myLocation.distanceTo(pub), " m");
-				
-				mOpt = new MarkerOptions().position(ll).title(place.name + dist)
+				ll = place.getLatLng();
+				mOpt = new MarkerOptions().position(ll)
+						.title(place.name + String.format(" (%.2f m)", place.distanceTo(myLocation)))
 						.icon(bmd);
 				map.addMarker(mOpt);
 				llbBuilder.include(ll);
 			}
-			map.animateCamera(CameraUpdateFactory.newLatLngBounds(
-					llbBuilder.build(), 20));
+			map.animateCamera(CameraUpdateFactory.newLatLngBounds(llbBuilder.build(), 20));
 		}
 		myMarker.showInfoWindow();
 	}
@@ -142,7 +135,6 @@ public class MyMapActivity extends PlaceSearchActivity implements LocationListen
 	@Override
 	public void updatePlaceDetails(PlaceDetails details) {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
@@ -157,19 +149,16 @@ public class MyMapActivity extends PlaceSearchActivity implements LocationListen
 	@Override
 	public void onProviderDisabled(String provider) {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void onProviderEnabled(String provider) {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void onStatusChanged(String provider, int status, Bundle extras) {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
@@ -177,5 +166,4 @@ public class MyMapActivity extends PlaceSearchActivity implements LocationListen
 		super.onResume();
 		setUpMapIfNeeded();
 	}
-
 }
