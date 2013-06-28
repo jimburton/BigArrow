@@ -33,6 +33,12 @@ public class Place implements Serializable {
 	
 	@Key
 	public Geometry geometry;
+	
+	@Key
+	public double rating;
+	
+	@Key
+	public OpeningHours opening_hours;
 
 	@Key
 	public String formatted_address;
@@ -70,6 +76,11 @@ public class Place implements Serializable {
 	public static class Geometry implements Serializable {
 		@Key
 		public Location location;
+	}
+	
+	public static class OpeningHours implements Serializable {
+		@Key
+		public boolean open_now;
 	}
 	
 	public static class Photo implements Serializable {
