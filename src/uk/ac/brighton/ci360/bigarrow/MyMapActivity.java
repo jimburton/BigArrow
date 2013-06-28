@@ -6,11 +6,14 @@ import java.util.List;
 import uk.ac.brighton.ci360.bigarrow.places.Place;
 import uk.ac.brighton.ci360.bigarrow.places.PlaceDetails;
 import uk.ac.brighton.ci360.bigarrow.places.PlacesList;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.provider.Settings;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -62,28 +65,10 @@ public class MyMapActivity extends PlaceSearchActivity implements LocationListen
 		setContentView(R.layout.activity_map);
 
 		locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-		myLocation = locationManager
-				.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-		if (myLocation == null) {
-			myLocation = locationManager
-					.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-		}
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
-				10000, 50, this);
-				
-				
-		/**IF GPS DISABLED myLocation is still null and app will crash**/
-		/**here is a little something that will do for the moment**/
-		//myLocation = new Location("");
-		//myLocation.setLatitude(51.0);
-		//myLocation.setLongitude(-0.13);
-		
-		myLatLng = new LatLng(myLocation.getLatitude(),
-				myLocation.getLongitude());
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 50, this);
 
 		setUpMapIfNeeded();
 
-		map.moveCamera(CameraUpdateFactory.newLatLngZoom(myLatLng, 15));
 		map.setOnInfoWindowClickListener(new OnInfoWindowClickListener() {
 			@Override
 			public void onInfoWindowClick(Marker marker) {
@@ -95,10 +80,26 @@ public class MyMapActivity extends PlaceSearchActivity implements LocationListen
 		});
 
 		pSearch = new PlaceSearch(this);
-		SearchEstab e = Prefs.getSearchType(this);
-		pSearch.search(myLocation, new SearchEstab[] { e },
-				SearchType.MANY);
-
+	}
+	
+	/**
+	 * Returns the current location of the requester
+	 * using best available provider
+	 * May return null if no providers available or
+	 * providers cannot be used under current conditions
+	 * Checking result for null is compulsory
+	 * @param lm - location manager
+	 * @return current location
+	 */
+	private Location getMyLocation(LocationManager lm) 
+	{
+		if (lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
+			return lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+		
+		if (lm.isProviderEnabled(LocationManager.GPS_PROVIDER))
+			return lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+		
+		return null;
 	}
 
 	private void setUpMapIfNeeded() {
@@ -154,10 +155,12 @@ public class MyMapActivity extends PlaceSearchActivity implements LocationListen
 	@Override
 	public void onLocationChanged(Location location) {
 		myLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+		//move map because location may have changed significantly
+		map.moveCamera(CameraUpdateFactory.newLatLngZoom(myLatLng, 15));
 		SearchEstab e = Prefs.getSearchType(this);
+		
 		//This needs to be done relative to the bounds of the map
-		pSearch.search(myLocation, new SearchEstab[] { e },
-				SearchType.MANY);
+		pSearch.search(myLocation, new SearchEstab[] { e }, SearchType.MANY);
 	}
 
 	@Override
@@ -179,5 +182,36 @@ public class MyMapActivity extends PlaceSearchActivity implements LocationListen
 	public void onResume() {
 		super.onResume();
 		setUpMapIfNeeded();
+		//app resumed, location or setting may have changed,
+		myLocation = getMyLocation(locationManager);
+		
+		//if null ask user to change settings, otherwise everything ready for search
+		if (myLocation == null)
+			getLocationServicesAlertDialog().show();
+		else
+			onLocationChanged(myLocation);
+	}
+	
+	/**
+	 * A specific alert dialog. If we will require more of those
+	 * we can easily make it a general by passing a string
+	 * @return - alert dialog saying that the application
+	 * needs GPS enabled to proceed. After user taps OK
+	 * he's redirected to the OS Location Settings
+	 */
+	public AlertDialog getLocationServicesAlertDialog()
+	{
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle("Location Services Not Active");
+		builder.setMessage("Please enable Location Services");
+		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialogInterface, int i) {
+				// Show location settings when the user acknowledges the alert dialog
+				Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+				startActivityForResult(intent, 0);
+			}
+		});
+		return builder.create();
 	}
 }
