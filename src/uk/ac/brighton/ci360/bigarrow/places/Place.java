@@ -1,6 +1,10 @@
 package uk.ac.brighton.ci360.bigarrow.places;
 
 import java.io.Serializable;
+import java.util.LinkedHashMap;
+
+import uk.ac.brighton.ci360.bigarrow.classes.Utils;
+
 import com.google.android.gms.maps.model.LatLng;
 import com.google.api.client.util.Key;
 
@@ -9,8 +13,26 @@ import com.google.api.client.util.Key;
  * Object to another using Intents Otherwise you can't pass to another actitivy
  * */
 public class Place implements Serializable {
-	
+
+	private static final long serialVersionUID = -1518642766553991067L;
+
 	public final static String NO_RESULT = "NO_RESULT";
+	
+	/**
+	 * Details about this place we're interested in to show
+	 * on place detail activity. The code is dynamic, only
+	 * need to add link between enum and actual field in the
+	 * getDetails() method
+	 */
+	public enum Detail {
+		NAME, ADDRESS, PHONE, LOCATION, RATING, OPENING_HOURS
+	};
+	
+	/**
+	 * Careful if accessing fields directly
+	 * Any of the keys below can be null
+	 * It is advised that you use getDetails() instead
+	 */
 
 	@Key
 	public String id;
@@ -27,7 +49,6 @@ public class Place implements Serializable {
 	@Key
 	public String vicinity;
 
-	/**Careful, the array might be NULL if a place has no photos**/
 	@Key
 	public Photo[] photos;
 	
@@ -47,6 +68,33 @@ public class Place implements Serializable {
 	public String formatted_phone_number;
 	
 	/**
+	 * The returned hashmap contains all details
+	 * we need to display on the place detail activity
+	 * The key is stringified Detail enum, value is string representation of this detail
+	 * It is advised to declare the map as "final" where you plan to use it
+	 * as it is only a very convenient data wrapper
+	 * Since it's linked, using keySet() will return keys in the order they were put
+	 * The map is safe to use as all of the values ARE NOT null,
+	 * so there is no need to check for null
+	 * Whenever you need more details, simply expand the map
+	 * @return details of this place
+	 */
+	public LinkedHashMap<String, String> getDetails() {
+		LinkedHashMap<String, String> details = new LinkedHashMap<String, String>();
+		details.put(Utils.format(Detail.NAME), name);	//put name
+		details.put(Utils.format(Detail.ADDRESS), formatted_address);	//put address
+		details.put(Utils.format(Detail.PHONE), formatted_phone_number);	//put phone
+		details.put(Utils.format(Detail.LOCATION), getLatLng().toString());	//put location
+		details.put(Utils.format(Detail.RATING), Utils.format(rating));	//put rating
+		details.put(Utils.format(Detail.OPENING_HOURS),
+				opening_hours == null ? Utils.NO_DATA : (opening_hours.open_now ? "open now" : "closed"));
+		
+		return details;
+	}
+	
+	/**
+	 * Assuming that geometry != null since google maps could find it
+	 * using some sort of coordintates
 	 * @return a pair of latitude and longitude coordinates of this place
 	 */
 	public LatLng getLatLng() {
@@ -73,16 +121,19 @@ public class Place implements Serializable {
 		return name + " - " + id + " - " + reference;
 	}
 
+	@SuppressWarnings("serial")
 	public static class Geometry implements Serializable {
 		@Key
 		public Location location;
 	}
 	
+	@SuppressWarnings("serial")
 	public static class OpeningHours implements Serializable {
 		@Key
 		public boolean open_now;
 	}
 	
+	@SuppressWarnings("serial")
 	public static class Photo implements Serializable {
 		@Key
 		public int height;
@@ -97,6 +148,7 @@ public class Place implements Serializable {
 		public int width;
 	}
 
+	@SuppressWarnings("serial")
 	public static class Location implements Serializable {
 		@Key
 		public double lat;
@@ -104,5 +156,4 @@ public class Place implements Serializable {
 		@Key
 		public double lng;
 	}
-
 }
