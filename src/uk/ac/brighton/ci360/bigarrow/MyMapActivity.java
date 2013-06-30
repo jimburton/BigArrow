@@ -7,13 +7,10 @@ import uk.ac.brighton.ci360.bigarrow.classes.Utils;
 import uk.ac.brighton.ci360.bigarrow.places.Place;
 import uk.ac.brighton.ci360.bigarrow.places.PlaceDetails;
 import uk.ac.brighton.ci360.bigarrow.places.PlacesList;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.provider.Settings;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -44,7 +41,6 @@ public class MyMapActivity extends PlaceSearchActivity implements PlaceSearchReq
 	double longitude;
 	OverlayItem overlayitem;
 	private LatLng myLatLng;
-	private Marker myMarker;
 	private GoogleMap map;
 	private LatLngBounds.Builder llbBuilder;
 	private PlaceSearch pSearch;
@@ -74,7 +70,7 @@ public class MyMapActivity extends PlaceSearchActivity implements PlaceSearchReq
 			}
 		});
 		pSearch = new PlaceSearch(this);
-		//if open 1st time, update, if null handle in resume
+		//if open 1st time - update, if null handle in resume
 		onLocationChanged(myLocation);
 	}
 
@@ -98,7 +94,7 @@ public class MyMapActivity extends PlaceSearchActivity implements PlaceSearchReq
 		String my_marker_label = getResources().getString(R.string.my_marker_label);
 		MarkerOptions mOpt = new MarkerOptions().position(myLatLng).title(my_marker_label);
 		mOpt.icon(BitmapDescriptorFactory.fromResource(R.drawable.mark_red));
-		myMarker = map.addMarker(mOpt);
+		map.addMarker(mOpt).showInfoWindow();
 		BitmapDescriptor bmd = BitmapDescriptorFactory.fromResource(R.drawable.mark_blue);
 		
 		if (places.results != null) {
@@ -107,7 +103,8 @@ public class MyMapActivity extends PlaceSearchActivity implements PlaceSearchReq
 			llbBuilder.include(myLatLng);
 			for (Place place : places.results) {
 				mOpt = new MarkerOptions().position(place.getLatLng())
-						.title(place.name + String.format(" (%.2f m)", place.distanceTo(myLocation)))
+						.title(place.name)
+						.snippet(Utils.distanceBetweenFormatted(place, myLocation))
 						.icon(bmd);
 				markerReference.put(map.addMarker(mOpt), place.reference);
 				llbBuilder.include(place.getLatLng());
@@ -117,7 +114,6 @@ public class MyMapActivity extends PlaceSearchActivity implements PlaceSearchReq
 			//set min distance for updates as 1/4 of the dist between bounds
 			minDistance = Utils.distanceBetween(llb.northeast, llb.southwest) / 4.0f;
 		}
-		myMarker.showInfoWindow();
 	}
 
 	@Override
@@ -132,7 +128,7 @@ public class MyMapActivity extends PlaceSearchActivity implements PlaceSearchReq
 	
 	@Override
 	public void onProviderEnabled(String provider) {
-		//provider has been enabled, get location
+		//provider has been enabled, update location
 		onLocationChanged(Utils.getMyLocation(locationManager));
 	}
 
@@ -143,32 +139,9 @@ public class MyMapActivity extends PlaceSearchActivity implements PlaceSearchReq
 		
 		//if null ask user to change settings
 		if (myLocation == null)
-			getLocationServicesAlertDialog().show();
+			Utils.getLocationServicesAlertDialog(this).show();
 
 		//register listener with more efficient callbacks
 		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, minTime, minDistance, this);
-	}
-	
-	/**
-	 * A specific alert dialog. If we will require more of those
-	 * we can easily make it a general by passing a string
-	 * @return - alert dialog saying that the application
-	 * needs GPS enabled to proceed. After user taps OK
-	 * he's redirected to the OS Location Settings
-	 */
-	public AlertDialog getLocationServicesAlertDialog()
-	{
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle("Location Services Not Active");
-		builder.setMessage("Please enable Location Services");
-		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialogInterface, int i) {
-				// Show location settings when the user acknowledges the alert dialog
-				Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-				startActivityForResult(intent, 0);
-			}
-		});
-		return builder.create();
 	}
 }
