@@ -1,6 +1,8 @@
 package uk.ac.brighton.ci360.bigarrow;
 
+import uk.ac.brighton.ci360.bigarrow.classes.Utils;
 import uk.ac.brighton.ci360.bigarrow.places.Place;
+import uk.ac.brighton.ci360.bigarrow.places.PlaceDetails;
 import uk.ac.brighton.ci360.bigarrow.places.PlacesList;
 import android.app.Activity;
 import android.location.Location;
@@ -30,14 +32,8 @@ public abstract class PlaceSearchActivity extends Activity implements
 		if (PLACES_SEARCH_ON) {
 			pSearch = new PlaceSearch(this);
 			locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-			myLocation = locationManager
-					.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-			if (myLocation == null) {
-				myLocation = locationManager
-						.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-			}
-			locationManager.requestLocationUpdates(
-					LocationManager.GPS_PROVIDER, 10000, 10, this);
+			myLocation = Utils.getMyLocation(locationManager);
+			
 			if(firstSearchType == SearchType.DETAIL) {
 				getDetail();
 			} else {
@@ -49,20 +45,25 @@ public abstract class PlaceSearchActivity extends Activity implements
 	@Override
 	public void onResume() {
 		super.onResume();
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,// or
-				// NETWORK_PROVIDER
-				10000, 50, this);
+		//register listeners in derived classes
+		//app resumed, manually re-check where we are, can be null - handle in derived classes!
+		//update the location for all derived classes 
+		myLocation = Utils.getMyLocation(locationManager);
 	}
 
 	@Override
 	public void onPause() {
 		super.onPause();
-		locationManager.removeUpdates(this);
+		//if remove listener, location doesnt get updated
+		//when provider is enabled
+		//perhaps there's a better way
+		//locationManager.removeUpdates(this);
 	}
 
 	@Override
 	public void onLocationChanged(Location location) {
 		if (PLACES_SEARCH_ON) {
+			myLocation = location;	//update our location
 			getNearest();
 		}
 	}
@@ -70,7 +71,6 @@ public abstract class PlaceSearchActivity extends Activity implements
 	@Override
 	public void onProviderDisabled(String provider) {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
@@ -79,6 +79,11 @@ public abstract class PlaceSearchActivity extends Activity implements
 			myLocation = locationManager.getLastKnownLocation(provider);
 			getNearest();
 		}
+	}
+	
+	@Override
+	public void onStatusChanged(String provider, int status, Bundle extras) {
+		// TODO Auto-generated method stub
 	}
 
 	private void getNearest() {
@@ -93,10 +98,14 @@ public abstract class PlaceSearchActivity extends Activity implements
 
 	@Override
 	public abstract void updateNearestPlaces(PlacesList places);
-
+	
 	@Override
-	public abstract void updateNearestPlace(Place place, Location location,
-			float distance);
+	public abstract void updateNearestPlace(Place place, Location location, float distance);
+	
+	@Override
+	public void updatePlaceDetails(PlaceDetails details) {
+		
+	}
 	
 	public String getReadableLabel(SearchEstab estab) {
 		String label = estab.label();
@@ -116,5 +125,4 @@ public abstract class PlaceSearchActivity extends Activity implements
 		}
 		return res;
 	}
-
 }
