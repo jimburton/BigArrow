@@ -141,6 +141,7 @@ public class MyMapActivity extends PlaceSearchActivity implements LocationListen
 				ll = new LatLng(place.geometry.location.lat,
 						place.geometry.location.lng); // longitude
 				mOpt = new MarkerOptions().position(ll).title(place.name)
+						.snippet(distanceBetweenFormatted(place, myLocation))
 						.icon(bmd);
 				map.addMarker(mOpt);
 				llbBuilder.include(ll);
