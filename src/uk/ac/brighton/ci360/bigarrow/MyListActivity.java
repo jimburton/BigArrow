@@ -1,5 +1,10 @@
 package uk.ac.brighton.ci360.bigarrow;
 
+/**
+ * This activity shows the nearest n places in a ListView.
+ * 
+ * @author jb259
+ */
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -8,6 +13,8 @@ import uk.ac.brighton.ci360.bigarrow.places.PlaceDetails;
 import uk.ac.brighton.ci360.bigarrow.places.PlacesList;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
@@ -19,7 +26,6 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
-import android.widget.Toast;
 
 
 public class MyListActivity extends PlaceSearchActivity {
@@ -119,6 +125,12 @@ public class MyListActivity extends PlaceSearchActivity {
 
 	@Override
 	public void updatePlaceDetails(PlaceDetails details) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void updatePhotos(ArrayList<Bitmap> results) {
 		// TODO Auto-generated method stub
 		
 	}

@@ -1,9 +1,19 @@
 package uk.ac.brighton.ci360.bigarrow;
 
+/**
+ * This activity renders the output from the camera onto a 
+ * SurfaceView, then overlays an ArrowView component on top of that.
+ * 
+ * @author jb259
+ */
+import java.util.ArrayList;
+
 import uk.ac.brighton.ci360.bigarrow.places.Place;
 import uk.ac.brighton.ci360.bigarrow.places.PlaceDetails;
 import uk.ac.brighton.ci360.bigarrow.places.PlacesList;
 import android.app.Activity;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.hardware.Camera;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -31,15 +41,16 @@ public class BigArrowActivity extends PlaceSearchActivity {
 
 	private int orientationSensor;
 	private float headingAngle;
-	private float pitchAngle;
-	private float rollAngle;
+	//private float pitchAngle;
+	//private float rollAngle;
 
 	private int accelerometerSensor;
-	private float xAxis;
+	//private float xAxis;
 	private TextView nearestPubLabel;
 	
 	protected SearchType firstSearchType = SearchType.SINGLE;
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		firstSearchType = SearchType.SINGLE;
@@ -71,11 +82,12 @@ public class BigArrowActivity extends PlaceSearchActivity {
 	}
 
 	final SensorEventListener sensorEventListener = new SensorEventListener() {
+		@SuppressWarnings("deprecation")
 		public void onSensorChanged(SensorEvent sensorEvent) {
 			if (sensorEvent.sensor.getType() == Sensor.TYPE_ORIENTATION) {
 				headingAngle = sensorEvent.values[0];
-				pitchAngle = sensorEvent.values[1];
-				rollAngle = sensorEvent.values[2];
+				//pitchAngle = sensorEvent.values[1];
+				//rollAngle = sensorEvent.values[2];
 				
 			    arrowView.updateData(headingAngle);
 
@@ -86,7 +98,7 @@ public class BigArrowActivity extends PlaceSearchActivity {
 			}
 
 			else if (sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-				xAxis = sensorEvent.values[0];
+				//xAxis = sensorEvent.values[0];
 
 				// Log.d(TAG, "X Axis: " + String.valueOf(xAxis));
 				// Log.d(TAG, "Y Axis: " +
@@ -242,6 +254,12 @@ public class BigArrowActivity extends PlaceSearchActivity {
 
 	@Override
 	public void updatePlaceDetails(PlaceDetails details) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void updatePhotos(ArrayList<Bitmap> results) {
 		// TODO Auto-generated method stub
 		
 	}

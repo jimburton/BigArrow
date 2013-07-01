@@ -1,15 +1,30 @@
 package uk.ac.brighton.ci360.bigarrow;
 
-import uk.ac.brighton.ci360.bigarrow.classes.Utils;
+/**
+ * This is the base class for activities that want to carry out a Places API search.
+ * The constructor contains some useful config and setuop that is common to the concrete
+ * implementations.
+ * 
+ * @author jb259
+ */
 import uk.ac.brighton.ci360.bigarrow.places.Place;
 import uk.ac.brighton.ci360.bigarrow.places.PlaceDetails;
 import uk.ac.brighton.ci360.bigarrow.places.PlacesList;
+import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.provider.Settings;
 
+import com.google.android.gms.maps.model.LatLng;
+
+@SuppressLint("DefaultLocale")
 public abstract class PlaceSearchActivity extends Activity implements
 		LocationListener, PlaceSearchRequester {
 
@@ -17,7 +32,7 @@ public abstract class PlaceSearchActivity extends Activity implements
 
 	protected LocationManager locationManager;
 	protected Location myLocation;
-	protected PlaceSearch pSearch;
+	protected PlacesAPISearch pSearch;
 
 	protected SearchType firstSearchType;
 	protected String placeReference;
@@ -26,13 +41,13 @@ public abstract class PlaceSearchActivity extends Activity implements
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		estab = Prefs.getSearchType(this);
+		estab = SharedPrefsActivity.getSearchType(this);
 		String estabStr = getReadableLabel(estab);
 		setTitle("Nearest " + estabStr);
 		if (PLACES_SEARCH_ON) {
-			pSearch = new PlaceSearch(this);
+			pSearch = new PlacesAPISearch(this);
 			locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-			myLocation = Utils.getMyLocation(locationManager);
+			myLocation = getMyLocation(locationManager);
 			
 			if(firstSearchType == SearchType.DETAIL) {
 				getDetail();
@@ -48,7 +63,7 @@ public abstract class PlaceSearchActivity extends Activity implements
 		//register listeners in derived classes
 		//app resumed, manually re-check where we are, can be null - handle in derived classes!
 		//update the location for all derived classes 
-		myLocation = Utils.getMyLocation(locationManager);
+		myLocation = getMyLocation(locationManager);
 	}
 
 	@Override
@@ -124,5 +139,85 @@ public abstract class PlaceSearchActivity extends Activity implements
 			res = getResources().getString(R.string.readable_label_taxi_stand);
 		}
 		return res;
+	}
+	
+	/**
+	 * Returns the current location of the requester
+	 * using best available provider
+	 * May return null if no providers available or
+	 * providers cannot be used under current conditions
+	 * Checking result for null is compulsory
+	 * @param lm - location manager
+	 * @return current location
+	 */
+	public Location getMyLocation(LocationManager lm) {
+		if (lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
+			return lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+		
+		return lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+	}
+
+	/**
+	 * @param ll1 - first pair of coords
+	 * @param ll2 - second pair of coors
+	 * @return Approximate distance in meters between 2 pairs of lat
+	 * and lng coordinates
+	 */
+	public float distanceBetween(LatLng ll1, LatLng ll2) {
+		Location loc1 = new Location("");
+		loc1.setLatitude(ll1.latitude);
+		loc1.setLongitude(ll1.longitude);
+		
+		Location loc2 = new Location("");
+		loc2.setLatitude(ll2.latitude);
+		loc2.setLongitude(ll2.longitude);
+		
+		return loc1.distanceTo(loc2);
+	}
+	
+	/**
+	 * @param place - place
+	 * @param location - location to which you need to know the distance
+	 * @return a distance in meters between place to the given location
+	 */
+	public float distanceBetween(Place place, Location location) {
+		return distanceBetween(place.getLatLng(), new LatLng(location.getLatitude(), location.getLongitude()));
+	}
+	
+	/**
+	 * Returns formatted distance between place and location
+	 * as a float value with 2 decimal places followed by the letter 'm'
+	 * everything in brackets
+	 * @param place
+	 * @param location
+	 * @return - distance between place and location
+	 */
+	@SuppressLint("DefaultLocale")
+	public String distanceBetweenFormatted(Place place, Location location) {
+		return String.format("(%.2f m)", distanceBetween(place, location));
+	}
+	
+	/**
+	 * A specific alert dialog. If we will require more of those
+	 * we can easily make it a general by passing a string
+	 * @return - alert dialog saying that the application
+	 * needs GPS enabled to proceed. After user taps OK
+	 * he's redirected to the OS Location Settings
+	 */
+	public AlertDialog getLocationServicesAlertDialog(Context context)
+	{
+		final Activity caller = (Activity) context;
+		AlertDialog.Builder builder = new AlertDialog.Builder(context);
+		builder.setTitle("Location Services Not Active");
+		builder.setMessage("Please enable Location Services");
+		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialogInterface, int i) {
+				// Show location settings when the user acknowledges the alert dialog
+				Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+				caller.startActivityForResult(intent, 0);
+			}
+		});
+		return builder.create();
 	}
 }

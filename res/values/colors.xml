@@ -3,8 +3,8 @@
     <color name="background">#3500ffff</color>
     <color name="color_bigarrow_bg">#80ffffff</color>
     
-    <color name="Black">#000000</color>
-    <color name="ExpandChildBackground">#FFAFABAB</color>
-    <color name="ExpandGroupBackground">#FF7C7C7C</color>
+    <color name="black">#000000</color>
+    <color name="expandChildBackground">#FFAFABAB</color>
+    <color name="expandGroupBackground">#FF7C7C7C</color>
     
 </resources>

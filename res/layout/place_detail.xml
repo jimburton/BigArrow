@@ -4,10 +4,25 @@
     android:layout_height="fill_parent"
     android:orientation="vertical" >
 
-            <ExpandableListView
-                android:id="@+id/ExpList"
-                android:layout_height="match_parent"
-                android:layout_width="match_parent"
-                android:groupIndicator="@null" />   
+    <TextView
+        android:id="@+id/name_txt"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <TextView
+        android:id="@+id/opening_hours_txt"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <TextView
+        android:id="@+id/address_txt"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <ExpandableListView
+        android:id="@+id/exp_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:groupIndicator="@null" />
 
 </LinearLayout>

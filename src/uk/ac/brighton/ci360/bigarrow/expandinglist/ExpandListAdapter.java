@@ -1,15 +1,14 @@
-package uk.ac.brighton.ci360.bigarrow.adapter;
+package uk.ac.brighton.ci360.bigarrow.expandinglist;
 
 import java.util.ArrayList;
 
-import uk.ac.brighton.ci360.bigarrow.*;
-import uk.ac.brighton.ci360.bigarrow.classes.*;
-
+import uk.ac.brighton.ci360.bigarrow.R;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 public class ExpandListAdapter extends BaseExpandableListAdapter {
@@ -27,6 +26,7 @@ public class ExpandListAdapter extends BaseExpandableListAdapter {
 		}
 		int index = groups.indexOf(group);
 		ArrayList<ExpandListChild> ch = groups.get(index).getItems();
+		if(ch == null) ch = new ArrayList<ExpandListChild>();
 		ch.add(item);
 		groups.get(index).setItems(ch);
 	}
@@ -48,10 +48,8 @@ public class ExpandListAdapter extends BaseExpandableListAdapter {
 			LayoutInflater infalInflater = (LayoutInflater) context.getSystemService(context.LAYOUT_INFLATER_SERVICE);
 			view = infalInflater.inflate(R.layout.expandlist_child_item, null);
 		}
-		TextView tv = (TextView) view.findViewById(R.id.tvChild);
-		tv.setText(child.getName().toString());
-		tv.setTag(child.getTag());
-		// TODO Auto-generated method stub
+		ImageView iv = (ImageView) view.findViewById(R.id.ivChild);
+		iv.setImageBitmap(child.getBmp());
 		return view;
 	}
 

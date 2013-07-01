@@ -1,4 +1,8 @@
 package uk.ac.brighton.ci360.bigarrow;
+/**
+ * This class is used to add markers to the map in MyMapActivity.
+ * @author jb259
+ */
 
 import java.util.ArrayList;
 
@@ -8,7 +12,6 @@ import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
 import android.view.MotionEvent;
 
-import com.google.android.maps.GeoPoint;
 import com.google.android.maps.ItemizedOverlay;
 import com.google.android.maps.MapView;
 import com.google.android.maps.OverlayItem;
@@ -33,6 +36,7 @@ public class AddItemizedOverlay extends ItemizedOverlay<OverlayItem> {
     {   
 
         if (event.getAction() == 1) {
+            /*
             GeoPoint geopoint = mapView.getProjection().fromPixels(
                 (int) event.getX(),
                 (int) event.getY());
@@ -40,7 +44,7 @@ public class AddItemizedOverlay extends ItemizedOverlay<OverlayItem> {
             double lat = geopoint.getLatitudeE6() / 1E6;
             // longitude
             double lon = geopoint.getLongitudeE6() / 1E6;
-            //Toast.makeText(context, "Lat: " + lat + ", Lon: "+lon, Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Lat: " + lat + ", Lon: "+lon, Toast.LENGTH_SHORT).show();*/
         }
         return false;
     } 

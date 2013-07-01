@@ -60,7 +60,7 @@
             android:label="@string/title_map_activity" >
         </activity>
         <activity
-            android:name=".Prefs"
+            android:name=".SharedPrefsActivity"
             android:label="@string/title_bigarrow_prefs_activity" >
         </activity>
         

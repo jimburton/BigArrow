@@ -1,6 +1,11 @@
 package uk.ac.brighton.ci360.bigarrow;
 
-import java.io.BufferedReader;
+/**
+ * This class encapsulates calls to the Places API.
+ * 
+ * @author jb259
+ */
+
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -11,25 +16,38 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Properties;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.HttpResponseException;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
 
 import uk.ac.brighton.ci360.bigarrow.PlaceSearchRequester.SearchEstab;
 import uk.ac.brighton.ci360.bigarrow.PlaceSearchRequester.SearchType;
 import uk.ac.brighton.ci360.bigarrow.places.Place;
+import uk.ac.brighton.ci360.bigarrow.places.Place.Photo;
 import uk.ac.brighton.ci360.bigarrow.places.PlaceDetails;
 import uk.ac.brighton.ci360.bigarrow.places.PlacesList;
+import android.annotation.SuppressLint;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -44,7 +62,8 @@ import com.google.api.client.http.apache.ApacheHttpTransport;
 import com.google.api.client.http.json.JsonHttpParser;
 import com.google.api.client.json.jackson.JacksonFactory;
 
-public class PlaceSearch {
+@SuppressLint("DefaultLocale")
+public class PlacesAPISearch {
 
 	private Location location;
 	private String estabType;
@@ -56,20 +75,25 @@ public class PlaceSearch {
 	private String apiKey;
 	private String placesSearchURL;
 	private String placesDetailsURL;
+	private String placesPhotoURL;
+	private ArrayList<Photo> photoRefs;
+	private ArrayList<Bitmap> photoResults;
 
-	public PlaceSearch(PlaceSearchRequester requester) {
+	public PlacesAPISearch(PlaceSearchRequester requester) {
 		this.requester = requester;
 		Properties prop = new Properties();
-		 
-    	try {
-    		prop.load(PlaceSearch.class.getClassLoader().getResourceAsStream("config.properties"));
-            apiKey = prop.getProperty("apikey_places");
-            placesSearchURL = prop.getProperty("places_endpoint_search");
-            placesDetailsURL = prop.getProperty("places_endpoint_details");
-            Log.d(TAG, apiKey);
-    	} catch (IOException ex) {
-    		ex.printStackTrace();
-        }
+
+		try {
+			prop.load(PlacesAPISearch.class.getClassLoader()
+					.getResourceAsStream("config.properties"));
+			apiKey = prop.getProperty("apikey_places");
+			placesSearchURL = prop.getProperty("places_endpoint_search");
+			placesDetailsURL = prop.getProperty("places_endpoint_details");
+			placesPhotoURL = prop.getProperty("places_endpoint_photo");
+			Log.d(TAG, apiKey);
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		}
 	}
 
 	public void search(Location l, SearchEstab[] estabs, SearchType searchType) {
@@ -85,7 +109,7 @@ public class PlaceSearch {
 		this.searchType = searchType;
 		new PlaceSearchTask().execute();
 	}
-	
+
 	public void getDetail(String reference) {
 		this.detailsReference = reference;
 		this.searchType = SearchType.DETAIL;
@@ -94,9 +118,9 @@ public class PlaceSearch {
 
 	class PlaceSearchTask extends AsyncTask<String, Void, PlacesList> {
 		final SearchType st = searchType;
+
 		protected PlacesList doInBackground(String... urls) {
 			PlacesList places = new PlacesList();
-			BufferedReader in = null;
 			try {
 				HttpTransport transport = new ApacheHttpTransport();
 				HttpRequestFactory httpRequestFactory = createRequestFactory(transport);
@@ -156,7 +180,6 @@ public class PlaceSearch {
 
 		protected PlaceDetails doInBackground(String... urls) {
 			PlaceDetails details = new PlaceDetails();
-			BufferedReader in = null;
 			try {
 				HttpTransport transport = new ApacheHttpTransport();
 				HttpRequestFactory httpRequestFactory = createRequestFactory(transport);
@@ -193,6 +216,70 @@ public class PlaceSearch {
 		}
 	}
 
+	public void getPhotos(Photo[] photoRefsArr) {
+		photoRefs = new ArrayList<Photo>(Arrays.asList(photoRefsArr));
+		photoResults = new ArrayList<Bitmap>();
+		requestPhotos();
+	}
+
+	private void requestPhotos() {
+		if (photoRefs.size() == 0) {
+			requester.updatePhotos(photoResults);
+		} else {
+			Photo p = photoRefs.remove(0);
+			new PhotoTask(p.photo_reference).execute();
+		}
+	}
+
+	class PhotoTask extends AsyncTask<String, Void, Bitmap> {
+
+		private final String photoRef;
+
+		PhotoTask(String photoRef) {
+			this.photoRef = photoRef;
+		}
+
+		protected Bitmap doInBackground(String... urls) {
+			try {
+				StringBuilder url = new StringBuilder(placesPhotoURL);
+				url.append("key=").append(apiKey).append("&");
+				url.append("sensor=true&");
+				url.append("photoreference=").append(photoRef).append("&");
+				url.append("maxwidth=200");
+				HttpUriRequest request = new HttpGet(url.toString());
+		        HttpClient httpClient = new DefaultHttpClient();
+		        HttpResponse response = httpClient.execute(request);
+		 
+		        StatusLine statusLine = response.getStatusLine();
+		        int statusCode = statusLine.getStatusCode();
+		        if (statusCode == 200) {
+		            HttpEntity entity = response.getEntity();
+		            byte[] bytes = EntityUtils.toByteArray(entity);
+		 
+		            Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0,
+		                    bytes.length);
+		            return bitmap;
+		        } else {
+		            throw new IOException("Download failed, HTTP response code "
+		                    + statusCode + " - " + statusLine.getReasonPhrase());
+		        }
+			} catch (HttpResponseException e) {
+				Log.e("Error:", e.getMessage());
+				returnNoResult();
+				return null;
+			} catch (IOException e) {
+				returnNoResult();
+				e.printStackTrace();
+				return null;
+			}
+		}
+
+		protected void onPostExecute(Bitmap bmp) {
+			photoResults.add(bmp);
+			requestPhotos();
+		}
+	}
+
 	public void getPlaceDetails(String reference) throws Exception {
 		detailsReference = reference;
 		new PlaceDetailsTask().execute();
@@ -223,6 +310,7 @@ public class PlaceSearch {
 		});
 	}
 
+	@SuppressWarnings("unused")
 	private HttpClient sslClient(HttpClient client) {
 		try {
 			X509TrustManager tm = new X509TrustManager() {

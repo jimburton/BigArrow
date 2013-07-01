@@ -1,9 +1,14 @@
 package uk.ac.brighton.ci360.bigarrow;
 
+/**
+ * This activity is the first one the user sees on opening the app, and
+ * it displays a list of three options for further activities.
+ * 
+ * @author jb259
+ */
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -30,7 +35,7 @@ public class HomePageActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
     	switch(item.getItemId()) {
     	case R.id.settings:
-    		startActivity(new Intent(this, Prefs.class));
+    		startActivity(new Intent(this, SharedPrefsActivity.class));
     		return true;
     	}
     	return false;

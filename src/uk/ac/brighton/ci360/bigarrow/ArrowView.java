@@ -1,5 +1,11 @@
 package uk.ac.brighton.ci360.bigarrow;
 
+/**
+ * This view is used for drawing on. It is overlayed on the output from the camera
+ * by BigArrowActivity.
+ * 
+ * @author jb259
+ */
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;

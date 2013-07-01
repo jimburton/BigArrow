@@ -1,16 +1,25 @@
 package uk.ac.brighton.ci360.bigarrow;
 
+/**
+ * This activity shows the nearest n places on a map.
+ * 
+ * @author jb259
+ */
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import uk.ac.brighton.ci360.bigarrow.classes.Utils;
 import uk.ac.brighton.ci360.bigarrow.places.Place;
 import uk.ac.brighton.ci360.bigarrow.places.PlaceDetails;
 import uk.ac.brighton.ci360.bigarrow.places.PlacesList;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -27,9 +36,10 @@ import com.google.android.maps.MapController;
 import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
 
-public class MyMapActivity extends PlaceSearchActivity implements PlaceSearchRequester {
+public class MyMapActivity extends PlaceSearchActivity implements LocationListener,
+		PlaceSearchRequester {
 
-	protected static final String TAG = null;
+	protected static final String TAG = "MyMapActivity";
 	MapFragment mapView;
 	List<Overlay> mapOverlays;
 	AddItemizedOverlay itemizedOverlay;
@@ -40,43 +50,64 @@ public class MyMapActivity extends PlaceSearchActivity implements PlaceSearchReq
 	double latitude;
 	double longitude;
 	OverlayItem overlayitem;
+	private LocationManager locationManager;
+	private Location myLocation;
 	private LatLng myLatLng;
+	private Marker myMarker;
 	private GoogleMap map;
 	private LatLngBounds.Builder llbBuilder;
-	private PlaceSearch pSearch;
-	
-	private float minDistance = 50.0f;
-	private long minTime = 300000;	//5 min
-	
-	/**
-	 * Contains marker and the reference of the place associated with that marker
-	 * According to HashMap keys they'll be overwritten when using new places
-	 * Still need to check with new markers/places in theory should work
-	 */
-	private HashMap<Marker, String> markerReference = new HashMap<Marker, String>();
+	private PlacesAPISearch pSearch;
+	private HashMap<String, String> refsLookup;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_map);
 
+		locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+		myLocation = locationManager
+				.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+		if (myLocation == null) {
+			myLocation = locationManager
+					.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+		}
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
+				10000, 50, this);
+				
+				
+		/**IF GPS DISABLED myLocation is still null and app will crash**/		
+		
+		myLatLng = new LatLng(myLocation.getLatitude(),
+				myLocation.getLongitude());
+
 		setUpMapIfNeeded();
+
+		map.moveCamera(CameraUpdateFactory.newLatLngZoom(myLatLng, 15));
 		map.setOnInfoWindowClickListener(new OnInfoWindowClickListener() {
 			@Override
 			public void onInfoWindowClick(Marker marker) {
-				Intent in = new Intent(getApplicationContext(), PlaceDetailActivity.class);
-                in.putExtra(PlaceDetails.KEY_REFERENCE, markerReference.get(marker));
-                startActivity(in);
+				String title = marker.getTitle();
+				if(refsLookup.containsKey(title)) {
+					String ref = refsLookup.get(title);
+					Log.d(TAG, ref);
+					Intent in = new Intent(getApplicationContext(), PlaceDetailActivity.class);
+	                in.putExtra(PlaceDetails.KEY_REFERENCE, ref);
+	                startActivity(in);
+				}
 			}
 		});
-		pSearch = new PlaceSearch(this);
-		//if open 1st time - update, if null handle in resume
-		onLocationChanged(myLocation);
+
+		pSearch = new PlacesAPISearch(this);
+		SearchEstab e = SharedPrefsActivity.getSearchType(this);
+		pSearch.search(myLocation, new SearchEstab[] { e },
+				SearchType.MANY);
+
 	}
 
 	private void setUpMapIfNeeded() {
 		if (map == null) {
-			map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
+			map = ((MapFragment) getFragmentManager()
+					.findFragmentById(R.id.map)).getMap();
 			if (map != null) {
 				// The Map is verified. It is now safe to manipulate the map.
 			}
@@ -84,64 +115,86 @@ public class MyMapActivity extends PlaceSearchActivity implements PlaceSearchReq
 	}
 
 	@Override
-	public void updateNearestPlace(Place place, Location location, float distance) {
+	public void updateNearestPlace(Place place, Location location,
+			float distance) {
 		// TODO Auto-generated method stub
+
 	}
 
 	@Override
 	public void updateNearestPlaces(PlacesList places) {
 		map.clear();
-		String my_marker_label = getResources().getString(R.string.my_marker_label);
-		MarkerOptions mOpt = new MarkerOptions().position(myLatLng).title(my_marker_label);
+		LatLng ll;
+		String marker_label = getResources().getString(R.string.my_marker_label);
+		MarkerOptions mOpt = new MarkerOptions().position(myLatLng).title(
+				marker_label);
 		mOpt.icon(BitmapDescriptorFactory.fromResource(R.drawable.mark_red));
-		map.addMarker(mOpt).showInfoWindow();
-		BitmapDescriptor bmd = BitmapDescriptorFactory.fromResource(R.drawable.mark_blue);
-		
+		myMarker = map.addMarker(mOpt);
+		BitmapDescriptor bmd = BitmapDescriptorFactory
+				.fromResource(R.drawable.mark_blue);
+		refsLookup = new HashMap<String, String>();
 		if (places.results != null) {
 			// loop through all the places
 			llbBuilder = new LatLngBounds.Builder();
 			llbBuilder.include(myLatLng);
 			for (Place place : places.results) {
-				mOpt = new MarkerOptions().position(place.getLatLng())
-						.title(place.name)
-						.snippet(Utils.distanceBetweenFormatted(place, myLocation))
+				ll = new LatLng(place.geometry.location.lat,
+						place.geometry.location.lng); // longitude
+				mOpt = new MarkerOptions().position(ll).title(place.name)
 						.icon(bmd);
-				markerReference.put(map.addMarker(mOpt), place.reference);
-				llbBuilder.include(place.getLatLng());
+				map.addMarker(mOpt);
+				llbBuilder.include(ll);
+				refsLookup.put(place.name, place.reference);
 			}
-			LatLngBounds llb = llbBuilder.build();
-			map.animateCamera(CameraUpdateFactory.newLatLngBounds(llb, 20));
-			//set min distance for updates as 1/4 of the dist between bounds
-			minDistance = Utils.distanceBetween(llb.northeast, llb.southwest) / 4.0f;
+			map.animateCamera(CameraUpdateFactory.newLatLngBounds(
+					llbBuilder.build(), 20));
 		}
+		myMarker.showInfoWindow();
+	}
+
+	@Override
+	public void updatePlaceDetails(PlaceDetails details) {
+		// TODO Auto-generated method stub
+
 	}
 
 	@Override
 	public void onLocationChanged(Location location) {
-		if (location != null) {
-			myLocation = location;	//if app hasn't been closed, we need to change our location
-			myLatLng = new LatLng(location.getLatitude(), location.getLongitude());
-			map.moveCamera(CameraUpdateFactory.newLatLngZoom(myLatLng, 15));
-			pSearch.search(myLocation, new SearchEstab[] {Prefs.getSearchType(this)}, SearchType.MANY);
-		}
+		myLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+		SearchEstab e = SharedPrefsActivity.getSearchType(this);
+		//This needs to be done relative to the bounds of the map
+		pSearch.search(myLocation, new SearchEstab[] { e },
+				SearchType.MANY);
 	}
-	
+
+	@Override
+	public void onProviderDisabled(String provider) {
+		// TODO Auto-generated method stub
+
+	}
+
 	@Override
 	public void onProviderEnabled(String provider) {
-		//provider has been enabled, update location
-		onLocationChanged(Utils.getMyLocation(locationManager));
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onStatusChanged(String provider, int status, Bundle extras) {
+		// TODO Auto-generated method stub
+
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
 		setUpMapIfNeeded();
-		
-		//if null ask user to change settings
-		if (myLocation == null)
-			Utils.getLocationServicesAlertDialog(this).show();
-
-		//register listener with more efficient callbacks
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, minTime, minDistance, this);
 	}
+
+	@Override
+	public void updatePhotos(ArrayList<Bitmap> results) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

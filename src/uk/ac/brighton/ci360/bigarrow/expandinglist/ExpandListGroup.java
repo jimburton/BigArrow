@@ -1,4 +1,4 @@
-package uk.ac.brighton.ci360.bigarrow.classes;
+package uk.ac.brighton.ci360.bigarrow.expandinglist;
 
 import java.util.ArrayList;
 

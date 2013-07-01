@@ -3,7 +3,7 @@ package uk.ac.brighton.ci360.bigarrow.places;
 import java.io.Serializable;
 import java.util.LinkedHashMap;
 
-import uk.ac.brighton.ci360.bigarrow.classes.Utils;
+import android.annotation.SuppressLint;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.api.client.util.Key;
@@ -17,6 +17,7 @@ public class Place implements Serializable {
 	private static final long serialVersionUID = -1518642766553991067L;
 
 	public final static String NO_RESULT = "NO_RESULT";
+	public static final String NO_DATA = "Not present";
 	
 	/**
 	 * Details about this place we're interested in to show
@@ -81,13 +82,13 @@ public class Place implements Serializable {
 	 */
 	public LinkedHashMap<String, String> getDetails() {
 		LinkedHashMap<String, String> details = new LinkedHashMap<String, String>();
-		details.put(Utils.format(Detail.NAME), name);	//put name
-		details.put(Utils.format(Detail.ADDRESS), formatted_address);	//put address
-		details.put(Utils.format(Detail.PHONE), formatted_phone_number);	//put phone
-		details.put(Utils.format(Detail.LOCATION), getLatLng().toString());	//put location
-		details.put(Utils.format(Detail.RATING), Utils.format(rating));	//put rating
-		details.put(Utils.format(Detail.OPENING_HOURS),
-				opening_hours == null ? Utils.NO_DATA : (opening_hours.open_now ? "open now" : "closed"));
+		details.put(format(Detail.NAME), name);	//put name
+		details.put(format(Detail.ADDRESS), formatted_address);	//put address
+		details.put(format(Detail.PHONE), formatted_phone_number);	//put phone
+		details.put(format(Detail.LOCATION), getLatLng().toString());	//put location
+		details.put(format(Detail.RATING), format(rating));	//put rating
+		details.put(format(Detail.OPENING_HOURS),
+				opening_hours == null ? NO_DATA : (opening_hours.open_now ? "open now" : "closed"));
 		
 		return details;
 	}
@@ -140,5 +141,18 @@ public class Place implements Serializable {
 
 		@Key
 		public double lng;
+	}
+	
+	public String format(String detail) {
+		return detail == null ? NO_DATA : detail;
+	}
+	
+	public String format(double detail) {
+		return detail == 0.0 ? NO_DATA : Double.toString(detail);
+	}
+	
+	@SuppressLint("DefaultLocale")
+	public String format(Detail detail) {
+		return detail.name().toLowerCase().replace('_', ' ');
 	}
 }

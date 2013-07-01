@@ -1,8 +1,18 @@
 package uk.ac.brighton.ci360.bigarrow;
+/**
+ * This interface is to be implemented by any class that wants to request
+ * a places search from an instance of PlacesAPISearch, e.g. any subclass of 
+ * PlaceSearchActivity. It specifies the callback methods that PlacesAPISearch 
+ * will call when the search request is done.
+ * 
+ * @author jb259
+ */
+import java.util.ArrayList;
 
 import uk.ac.brighton.ci360.bigarrow.places.Place;
 import uk.ac.brighton.ci360.bigarrow.places.PlaceDetails;
 import uk.ac.brighton.ci360.bigarrow.places.PlacesList;
+import android.graphics.Bitmap;
 import android.location.Location;
 
 public interface PlaceSearchRequester {
@@ -34,4 +44,5 @@ public interface PlaceSearchRequester {
 	public void updateNearestPlace(Place place, Location location, float distance);
 	public void updateNearestPlaces(PlacesList places);
 	public void updatePlaceDetails(PlaceDetails details); 
+	public void updatePhotos(ArrayList<Bitmap> results);
 }
