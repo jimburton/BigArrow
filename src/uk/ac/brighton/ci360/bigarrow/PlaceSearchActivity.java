@@ -5,7 +5,7 @@ package uk.ac.brighton.ci360.bigarrow;
  * The constructor contains some useful config and setuop that is common to the concrete
  * implementations.
  * 
- * Copyright (c) 2013 University of Brighton.
+ * Copyright (c) 2013 The BigArrow authors (see the file AUTHORS).
  * See the file LICENSE for copying permission.
  * 
  * @author jb259

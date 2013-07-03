@@ -2,7 +2,7 @@ package uk.ac.brighton.ci360.bigarrow;
 /**
  * This subclass of PreferenceActivity handles the behaviour of the settings menu.
  * 
- * Copyright (c) 2013 University of Brighton.
+ * Copyright (c) 2013 The BigArrow authors (see the file AUTHORS).
  * See the file LICENSE for copying permission.
  * 
  * @author jb259

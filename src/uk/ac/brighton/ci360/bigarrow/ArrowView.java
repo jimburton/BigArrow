@@ -4,7 +4,7 @@ package uk.ac.brighton.ci360.bigarrow;
  * This view is used for drawing on. It is overlayed on the output from the camera
  * by BigArrowActivity.
  * 
- * Copyright (c) 2013 University of Brighton.
+ * Copyright (c) 2013 The BigArrow authors (see the file AUTHORS).
  * See the file LICENSE for copying permission.
  * 
  * @author jb259

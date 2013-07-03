@@ -4,7 +4,7 @@ package uk.ac.brighton.ci360.bigarrow;
  * This activity renders the output from the camera onto a 
  * SurfaceView, then overlays an ArrowView component on top of that.
  * 
- * Copyright (c) 2013 University of Brighton.
+ * Copyright (c) 2013 The BigArrow authors (see the file AUTHORS).
  * See the file LICENSE for copying permission.
  * 
  * @author jb259

@@ -4,7 +4,7 @@ package uk.ac.brighton.ci360.bigarrow;
  * This activity is the first one the user sees on opening the app, and
  * it displays a list of three options for further activities.
  * 
- * Copyright (c) 2013 University of Brighton.
+ * Copyright (c) 2013 The BigArrow authors (see the file AUTHORS).
  * See the file LICENSE for copying permission.
  * 
  * @author jb259

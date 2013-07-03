@@ -2,7 +2,7 @@ package uk.ac.brighton.ci360.bigarrow.places;
 /**
  * A data transfer object for a set of results returned from the Places API.
  * 
- * Copyright (c) 2013 University of Brighton.
+ * Copyright (c) 2013 The BigArrow authors (see the file AUTHORS).
  * See the file LICENSE for copying permission.
  * 
  * @author jb259

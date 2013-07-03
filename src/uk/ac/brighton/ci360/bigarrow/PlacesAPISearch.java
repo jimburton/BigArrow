@@ -3,7 +3,7 @@ package uk.ac.brighton.ci360.bigarrow;
 /**
  * This class encapsulates calls to the Places API.
  * 
- * Copyright (c) 2013 University of Brighton.
+ * Copyright (c) 2013 The BigArrow authors (see the file AUTHORS).
  * See the file LICENSE for copying permission.
  * 
  * @author jb259

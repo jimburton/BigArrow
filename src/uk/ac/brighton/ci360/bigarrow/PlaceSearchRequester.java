@@ -5,7 +5,7 @@ package uk.ac.brighton.ci360.bigarrow;
  * PlaceSearchActivity. It specifies the callback methods that PlacesAPISearch 
  * will call when the search request is done.
  * 
- * Copyright (c) 2013 University of Brighton.
+ * Copyright (c) 2013 The BigArrow authors (see the file AUTHORS).
  * See the file LICENSE for copying permission.
  * 
  * @author jb259
