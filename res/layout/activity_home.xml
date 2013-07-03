@@ -1,39 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:font="http://schemas.android.com/apk/res/uk.ac.brighton.ci360.bigarrow"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:layout_gravity="center"
-    android:background="@color/background"
+    android:background="#0066cc"
     android:orientation="vertical"
     android:padding="30dip" >
 
-    <TextView
+    <uk.ac.brighton.ci360.bigarrow.ui.TypefacedTextView 
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginBottom="25dip"
         android:text="@string/main_title" 
-        android:textSize="24.5sp" />
+        android:textSize="24.5sp" 
+        android:textColor="@color/black"
+        font:typeface="RobotoBold.ttf"/> 
 
-    <Button
+    <uk.ac.brighton.ci360.bigarrow.ui.TypefacedButton
         android:id="@+id/bigarrow_button"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
         android:text="@string/bigarrow_button_label"
-        android:onClick="onClick" />
+        android:onClick="onClick"
+        android:background="@color/white"
+        android:textColor="@color/black"
+        font:typeface="RobotoThin.ttf" />
 
-    <Button
+    <uk.ac.brighton.ci360.bigarrow.ui.TypefacedButton
         android:id="@+id/list_button"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
         android:text="@string/list_button_label"
-        android:onClick="onClick" />
+        android:onClick="onClick" 
+        android:background="@color/white"
+        android:textColor="@color/black"
+        font:typeface="RobotoThin.ttf" />
     
-    <Button
+    <uk.ac.brighton.ci360.bigarrow.ui.TypefacedButton
         android:id="@+id/map_button"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
         android:text="@string/map_button_label"
-        android:onClick="onClick" />
+        android:onClick="onClick" 
+        android:background="@color/white"
+        android:textColor="@color/black"
+        font:typeface="RobotoThin.ttf" />
 
 </LinearLayout>

@@ -1,10 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="background">#3500ffff</color>
+    <color name="background_home">#80ffff</color>
+   
     <color name="color_bigarrow_bg">#80ffffff</color>
     
     <color name="black">#000000</color>
-    <color name="expandChildBackground">#FFAFABAB</color>
-    <color name="expandGroupBackground">#FF7C7C7C</color>
+    <color name="white">#ffffff</color>
+    <color name="dark_grey">#4e4e4d</color>
+    
+    <color name="expandChildBackground">#ffafabab</color>
+    <color name="expandGroupBackground">#ff7c7c7c</color>
     
 </resources>
