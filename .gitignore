@@ -1,5 +1,7 @@
 /bin/
 /.idea/
+/src/config.properties
+/ApplicationManifest.xml
 *.class
 
 # Package Files #
