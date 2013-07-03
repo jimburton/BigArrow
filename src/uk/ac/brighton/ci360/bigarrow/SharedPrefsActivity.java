@@ -2,6 +2,9 @@ package uk.ac.brighton.ci360.bigarrow;
 /**
  * This subclass of PreferenceActivity handles the behaviour of the settings menu.
  * 
+ * Copyright (c) 2013 University of Brighton.
+ * See the file LICENSE for copying permission.
+ * 
  * @author jb259
  */
 import uk.ac.brighton.ci360.bigarrow.PlaceSearchRequester.SearchEstab;

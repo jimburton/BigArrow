@@ -1,4 +1,12 @@
 package uk.ac.brighton.ci360.bigarrow.places;
+/**
+ * A data transfer object for a result returned from the Places API.
+ * 
+ * Copyright (c) 2013 University of Brighton.
+ * See the file LICENSE for copying permission.
+ * 
+ * @author jb259
+ **/
 
 import java.io.Serializable;
 import java.util.LinkedHashMap;
@@ -8,10 +16,6 @@ import android.annotation.SuppressLint;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.api.client.util.Key;
 
-/**
- * Implement this class from "Serializable" So that you can pass this class
- * Object to another using Intents Otherwise you can't pass to another actitivy
- * */
 public class Place implements Serializable {
 
 	private static final long serialVersionUID = -1518642766553991067L;

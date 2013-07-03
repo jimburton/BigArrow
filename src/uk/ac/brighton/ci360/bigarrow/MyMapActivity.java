@@ -3,6 +3,9 @@ package uk.ac.brighton.ci360.bigarrow;
 /**
  * This activity shows the nearest n places on a map.
  * 
+ * Copyright (c) 2013 University of Brighton.
+ * See the file LICENSE for copying permission.
+ * 
  * @author jb259
  */
 import java.util.ArrayList;

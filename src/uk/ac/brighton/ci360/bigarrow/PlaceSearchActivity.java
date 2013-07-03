@@ -5,6 +5,9 @@ package uk.ac.brighton.ci360.bigarrow;
  * The constructor contains some useful config and setuop that is common to the concrete
  * implementations.
  * 
+ * Copyright (c) 2013 University of Brighton.
+ * See the file LICENSE for copying permission.
+ * 
  * @author jb259
  */
 import uk.ac.brighton.ci360.bigarrow.places.Place;

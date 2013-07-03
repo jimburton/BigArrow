@@ -1,5 +1,13 @@
-package uk.ac.brighton.ci360.bigarrow.expandinglist;
+package uk.ac.brighton.ci360.bigarrow.ui;
 
+/**
+ * The adapter for the expandable list.
+ * 
+ * Copyright (c) 2013 University of Brighton.
+ * See the file LICENSE for copying permission.
+ * 
+ * @author Almas Baimagambetov
+ */
 import java.util.ArrayList;
 
 import uk.ac.brighton.ci360.bigarrow.R;

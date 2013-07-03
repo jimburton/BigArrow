@@ -1,6 +1,10 @@
 package uk.ac.brighton.ci360.bigarrow;
 /**
  * This class is used to add markers to the map in MyMapActivity.
+ * 
+ * Copyright (c) 2013 University of Brighton.
+ * See the file LICENSE for copying permission.
+ * 
  * @author jb259
  */
 

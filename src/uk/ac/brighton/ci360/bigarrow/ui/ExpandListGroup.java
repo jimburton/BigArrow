@@ -1,5 +1,12 @@
-package uk.ac.brighton.ci360.bigarrow.expandinglist;
-
+package uk.ac.brighton.ci360.bigarrow.ui;
+/**
+ * A group within the expandable list.
+ * 
+ * Copyright (c) 2013 University of Brighton.
+ * See the file LICENSE for copying permission.
+ * 
+ * @author Almas Baimagambetov
+ */
 import java.util.ArrayList;
 
 public class ExpandListGroup {

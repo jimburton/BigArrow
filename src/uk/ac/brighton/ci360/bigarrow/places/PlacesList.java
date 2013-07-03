@@ -1,14 +1,17 @@
 package uk.ac.brighton.ci360.bigarrow.places;
-
+/**
+ * A data transfer object for a set of results returned from the Places API.
+ * 
+ * Copyright (c) 2013 University of Brighton.
+ * See the file LICENSE for copying permission.
+ * 
+ * @author jb259
+ **/
 import java.io.Serializable;
 import java.util.List;
  
 import com.google.api.client.util.Key;
- 
-/** Implement this class from "Serializable"
-* So that you can pass this class Object to another using Intents
-* Otherwise you can't pass to another actitivy
-* */
+
 public class PlacesList implements Serializable {
  
     /**

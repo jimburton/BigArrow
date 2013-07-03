@@ -1,5 +1,12 @@
-package uk.ac.brighton.ci360.bigarrow.expandinglist;
-
+package uk.ac.brighton.ci360.bigarrow.ui;
+/**
+ * A child of the expandable list.
+ * 
+ * Copyright (c) 2013 University of Brighton.
+ * See the file LICENSE for copying permission.
+ * 
+ * @author Almas Baimagambetov
+ */
 import android.graphics.Bitmap;
 
 public class ExpandListChild {

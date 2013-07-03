@@ -3,17 +3,20 @@ package uk.ac.brighton.ci360.bigarrow;
 /**
  * This activity shows the full details of a selected place.
  * 
+ * Copyright (c) 2013 University of Brighton.
+ * See the file LICENSE for copying permission.
+ * 
  * @author jb259
  */
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
-import uk.ac.brighton.ci360.bigarrow.expandinglist.ExpandListAdapter;
-import uk.ac.brighton.ci360.bigarrow.expandinglist.ExpandListChild;
-import uk.ac.brighton.ci360.bigarrow.expandinglist.ExpandListGroup;
 import uk.ac.brighton.ci360.bigarrow.places.Place;
 import uk.ac.brighton.ci360.bigarrow.places.PlaceDetails;
 import uk.ac.brighton.ci360.bigarrow.places.PlacesList;
+import uk.ac.brighton.ci360.bigarrow.ui.ExpandListAdapter;
+import uk.ac.brighton.ci360.bigarrow.ui.ExpandListChild;
+import uk.ac.brighton.ci360.bigarrow.ui.ExpandListGroup;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
