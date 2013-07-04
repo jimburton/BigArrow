@@ -1,6 +1,7 @@
 package uk.ac.brighton.ci360.bigarrow.places;
 
 import java.io.Serializable;
+import java.util.Calendar;
 import java.util.LinkedHashMap;
 
 import android.annotation.SuppressLint;
@@ -117,7 +118,36 @@ public class Place implements Serializable {
 	public static class OpeningHours implements Serializable {
 		@Key
 		public boolean open_now;
+		
+		@Key
+		public Period[] periods;
 	}
+	
+	@SuppressWarnings("serial")
+    public static class Period implements Serializable {
+        @Key
+        public DayTime open;
+        
+        @Key
+        public DayTime close;
+    }
+	
+	@SuppressWarnings("serial")
+    public static class DayTime implements Serializable {
+        @Key
+        public int day;
+        
+        @Key
+        public String time;
+        
+        @Override
+        public String toString() {
+            //Calendar cal = Calendar.getInstance();
+            //cal.get(Calendar.DAY_OF_WEEK)-1;
+            //String time = this.time + "";
+            return time.substring(0, 2) + ":" + time.substring(2);
+        }
+    }
 	
 	@SuppressWarnings("serial")
 	public static class Photo implements Serializable {

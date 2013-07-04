@@ -6,7 +6,6 @@ package uk.ac.brighton.ci360.bigarrow;
  * @author jb259
  */
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 
 import uk.ac.brighton.ci360.bigarrow.expandinglist.ExpandListAdapter;
 import uk.ac.brighton.ci360.bigarrow.expandinglist.ExpandListChild;
@@ -31,7 +30,7 @@ public class PlaceDetailActivity extends PlaceSearchActivity {
 	PlaceDetails placeDetails;
 	ProgressDialog pDialog;
 
-	private TextView nameTV, openingHoursTV, addressTV;
+	private TextView nameTV, openingHoursTV, addressTV, distanceTV;
 	private ExpandListAdapter adapter;
 	private ExpandableListView expList;
 	private ExpandListGroup contactGroup, photoGroup, reviewGroup;
@@ -45,8 +44,10 @@ public class PlaceDetailActivity extends PlaceSearchActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.place_detail);
 		nameTV = (TextView) findViewById(R.id.name_txt);
-		openingHoursTV = (TextView) findViewById(R.id.opening_hours_txt);
 		addressTV = (TextView) findViewById(R.id.address_txt);
+		distanceTV = (TextView) findViewById(R.id.distance_txt);
+		openingHoursTV = (TextView) findViewById(R.id.opening_hours_txt);
+		
 		expList = (ExpandableListView) findViewById(R.id.exp_list);
 		
 		ArrayList<ExpandListGroup> grps = new ArrayList<ExpandListGroup>();
@@ -55,12 +56,12 @@ public class PlaceDetailActivity extends PlaceSearchActivity {
 		grps.add(contactGroup);
 		
 		photoGroup = new ExpandListGroup();
-		contactGroup.setName("Photos");
+		photoGroup.setName("Photos");
 		grps.add(photoGroup);
 		
 		reviewGroup = new ExpandListGroup();
-		contactGroup.setName("Reviews");
-		grps.add(reviewGroup);
+		reviewGroup.setName("Reviews");
+		//grps.add(reviewGroup);  no reviews yet
 		
 		adapter = new ExpandListAdapter(this, grps);
         expList.setAdapter(adapter);
@@ -72,6 +73,7 @@ public class PlaceDetailActivity extends PlaceSearchActivity {
 		pDialog.show();
 	}
 
+
 	@Override
 	public void updatePlaceDetails(PlaceDetails details) {
 		// Log.d(TAG, "displaying details for  " + details.result.name);
@@ -82,60 +84,38 @@ public class PlaceDetailActivity extends PlaceSearchActivity {
 			public void run() {
 				if (placeDetails != null) {
 					String status = placeDetails.status;
-					Place place = placeDetails.result;
+					final Place place = placeDetails.result;
 					if (status.equals("OK") && place != null) {
 						nameTV.setText(place.name);
+						addressTV.setText(place.formatted_address);
+						distanceTV.setText("Distance: " + distanceBetweenFormatted(place, myLocation));
+						
 						if (place.opening_hours != null) {
 							String open_txt = (place.opening_hours.open_now ? OPEN
 									: "");
-							open_txt += place.opening_hours.toString();
-							openingHoursTV.setText(open_txt);
-						}
-						addressTV.setText(place.formatted_address);
-						if (place.photos != null && place.photos.length > 0) {
-							pSearch.getPhotos(place.photos);
-						}
 
-						/*
-						 * ExpandList = (ExpandableListView)
-						 * findViewById(R.id.ExpList); ExpAdapter = new
-						 * ExpandListAdapter( PlaceDetailActivity.this,
-						 * getExpListItems(place));
-						 * ExpandList.setAdapter(ExpAdapter);
-						 */
+        					if (place.opening_hours.periods != null && place.opening_hours.periods.length > 0
+        					        && place.opening_hours.periods[0].open != null)
+        					    open_txt += " " + place.opening_hours.periods[0].open.toString();
+        					
+        					if (place.opening_hours.periods != null && place.opening_hours.periods.length > 0
+                                    && place.opening_hours.periods[0].close != null)
+                                open_txt += "-" + place.opening_hours.periods[0].close.toString();
+        					    
+        					openingHoursTV.setText(open_txt);
+        				}
+						
+						if (place.photos != null && place.photos.length > 0) {
+                            pSearch.getPhotos(place.photos);
+                        }
+						
+						ExpandListChild c = new ExpandListChild();
+						String phone = place.formatted_phone_number == null ?
+						        "Not present" : place.formatted_phone_number;
+			            c.setName(phone);
+			            adapter.addItem(c, contactGroup);
 					}
 				}
-			}
-
-			/**
-			 * @param place
-			 *            - the place, details of which are asked
-			 * @return - list of groups used for showing the expandable view to
-			 *         the user
-			 */
-			private ArrayList<ExpandListGroup> getExpListItems(Place place) {
-				ArrayList<ExpandListGroup> list = new ArrayList<ExpandListGroup>();
-				ArrayList<ExpandListChild> list2 = new ArrayList<ExpandListChild>();
-
-				final LinkedHashMap<String, String> details = place
-						.getDetails();
-
-				// loop through all details available in the hashmap
-				for (String key : details.keySet()) {
-					ExpandListGroup group = new ExpandListGroup();
-					group.setName(key);
-					ExpandListChild child = new ExpandListChild();
-					child.setName(details.get(key));
-					child.setTag(null);
-					list2.add(child);
-
-					group.setItems(list2);
-					list2 = new ArrayList<ExpandListChild>();
-
-					list.add(group);
-				}
-
-				return list;
 			}
 		});
 	}
@@ -157,14 +137,18 @@ public class PlaceDetailActivity extends PlaceSearchActivity {
 	}
 
 	@Override
-	public void updatePhotos(ArrayList<Bitmap> results) {
-		for (Bitmap bmp : results) {
-			ImageView i = new ImageView(this);
-			i.setImageBitmap(bmp);
-			ExpandListChild c = new ExpandListChild();
-			c.setBmp(bmp);
-			adapter.addItem(c, photoGroup);
-		}
-
+	public void updatePhotos(final ArrayList<Bitmap> results) {
+	    runOnUiThread(new Runnable() {
+	       public void run() {
+	           for (Bitmap bmp : results) {
+	               ImageView i = (ImageView) findViewById(R.id.imageView1);
+	               i.setImageBitmap(bmp);
+	               ExpandListChild c = new ExpandListChild();
+	               c.setBmp(bmp);
+	               adapter.addItem(c, photoGroup);
+	           }
+	       }
+	    });
 	}
+
 }
