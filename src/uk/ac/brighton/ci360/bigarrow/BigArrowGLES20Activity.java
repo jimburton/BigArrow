@@ -1,28 +1,20 @@
 package uk.ac.brighton.ci360.bigarrow;
 
-/**
- * This activity renders the output from the camera onto a 
- * SurfaceView, then overlays an ArrowView component on top of that.
- * 
- * Copyright (c) 2013 The BigArrow authors (see the file AUTHORS).
- * See the file LICENSE for copying permission.
- * 
- * @author jb259
- */
 import java.util.ArrayList;
 
+import uk.ac.brighton.ci360.bigarrow.opengles.MyGLSurfaceView;
 import uk.ac.brighton.ci360.bigarrow.places.Place;
 import uk.ac.brighton.ci360.bigarrow.places.PlaceDetails;
 import uk.ac.brighton.ci360.bigarrow.places.PlacesList;
 import android.app.Activity;
 import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 import android.hardware.Camera;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Location;
+import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Surface;
@@ -31,13 +23,15 @@ import android.view.SurfaceView;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.TextView;
 
-public class BigArrowActivity extends PlaceSearchActivity {
+public class BigArrowGLES20Activity extends PlaceSearchActivity {
 	
 	private SurfaceView cameraPreview;
 	private SurfaceHolder previewHolder;
-	private ArrowView arrowView;
+	//private ArrowView arrowView;
 	private Camera camera;
 	private boolean inPreview;
+	
+	private GLSurfaceView mGLView;
 
 	private final static String TAG = "BigArrow";
 	private SensorManager sensorManager;
@@ -73,15 +67,14 @@ public class BigArrowActivity extends PlaceSearchActivity {
 		inPreview = false;
 
 		cameraPreview = (SurfaceView) findViewById(R.id.cameraPreview);
-		arrowView = new ArrowView(this);
-		addContentView(arrowView, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+		mGLView = new MyGLSurfaceView(this);
+        addContentView(mGLView, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 		previewHolder = cameraPreview.getHolder();
 		previewHolder.addCallback(surfaceCallback);
 		previewHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
 		nearestPubLabel = (TextView) findViewById(R.id.nearest_place_label);
-		//nearestPubLabel.setText(R.string.bigarrow_searching);
-		nearestPubLabel.setText("BANANAS");
+		nearestPubLabel.setText(R.string.bigarrow_searching); 
 	
 	}
 
@@ -93,7 +86,7 @@ public class BigArrowActivity extends PlaceSearchActivity {
 				//pitchAngle = sensorEvent.values[1];
 				//rollAngle = sensorEvent.values[2];
 				
-			    arrowView.updateData(headingAngle);
+			    //arrowView.updateData(headingAngle);
 
 				// Log.d(TAG, "Heading: " + String.valueOf(headingAngle));
 				// Log.d(TAG, "Pitch: " + String.valueOf(pitchAngle));
@@ -122,6 +115,7 @@ public class BigArrowActivity extends PlaceSearchActivity {
 	@Override
 	public void onResume() {
 		super.onResume();
+		if(mGLView != null) mGLView.onResume();
 		sensorManager.registerListener(sensorEventListener,
 				sensorManager.getDefaultSensor(orientationSensor),
 				SensorManager.SENSOR_DELAY_NORMAL);
@@ -143,6 +137,7 @@ public class BigArrowActivity extends PlaceSearchActivity {
 		inPreview = false;
 
 		super.onPause();
+		if(mGLView != null) mGLView.onPause();
 	}
 
 	private Camera.Size getBestPreviewSize(int width, int height,
@@ -232,7 +227,7 @@ public class BigArrowActivity extends PlaceSearchActivity {
 		nearestPubLabel.setText(place.name);
 		if(!place.id.equals(Place.NO_RESULT)) {
 			nearestPubLabel.append(": " + (int)distance + "m");
-			if (myLocation != null) arrowView.updateData(getAngle(location));
+			//if (myLocation != null) arrowView.updateData(getAngle(location));
 		}
 	}
 
@@ -263,8 +258,9 @@ public class BigArrowActivity extends PlaceSearchActivity {
 	}
 
 	@Override
-	public void updatePhotos(ArrayList<Bitmap> results) {
+	public void updatePhotos(ArrayList<Bitmap> results) { 
 		// TODO Auto-generated method stub
 		
 	}
 }
+

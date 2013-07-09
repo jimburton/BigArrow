@@ -48,7 +48,8 @@ public class HomePageActivity extends Activity {
 		Intent i;
 		switch(v.getId()) {
 		case R.id.bigarrow_button:
-			i = new Intent(this, BigArrowActivity.class);
+			//i = new Intent(this, BigArrowActivity.class);
+			i = new Intent(this, BigArrowGLES20Activity.class);
 			startActivity(i);
 			break;
 		case R.id.list_button:

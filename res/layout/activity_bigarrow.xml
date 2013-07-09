@@ -10,27 +10,13 @@
 		android:layout_height="fill_parent" />
 
 	<TextView
-	    android:id="@+id/xAxisValue"
+	    android:id="@+id/nearest_place_label"
 	    android:layout_width="wrap_content"
 	    android:layout_height="wrap_content"
 	    android:layout_alignParentBottom="true"
  		android:layout_centerHorizontal="true"
  		android:textColor="#000"
  		android:textSize="30sp"
-	    android:text="@string/empty" 
-	    android:background="@color/color_bigarrow_bg" />
+	    android:text="@string/empty"  />
 
 </RelativeLayout>
-<!-- <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-  android:orientation="vertical"
-  android:layout_width="fill_parent"
-  android:layout_height="fill_parent">
-  
-    <uk.ac.brighton.ci360.bigarrow.OverlayView android:id="@+id/surface_overlay"
-      android:layout_width="fill_parent"
-      android:layout_height="fill_parent" />
-    
-    <SurfaceView android:id="@+id/surface_camera"
-      android:layout_width="fill_parent"
-      android:layout_height="fill_parent" />
-</FrameLayout>-->

@@ -31,7 +31,7 @@ import com.google.android.gms.maps.model.LatLng;
 public abstract class PlaceSearchActivity extends Activity implements
 		LocationListener, PlaceSearchRequester {
 
-	protected final boolean PLACES_SEARCH_ON = true;
+	protected final boolean PLACES_SEARCH_ON = false;
 
 	protected LocationManager locationManager;
 	protected Location myLocation;
@@ -154,10 +154,10 @@ public abstract class PlaceSearchActivity extends Activity implements
 	 * @return current location
 	 */
 	public Location getMyLocation(LocationManager lm) {
-		if (lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
+		if (lm != null && lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
 			return lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 		
-		return lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+		return (lm == null) ? null : lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 	}
 
 	/**
