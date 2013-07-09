@@ -23,7 +23,7 @@ public class Triangle {
             "precision mediump float;" +
             "uniform vec4 vColor;" +
             "void main() {" +
-            "  gl_FragColor = vColor;" +
+            "  gl_FragColor = vec4(1.0, 0.0, 0.0, 0.0);" +
             "}";
 
         private final FloatBuffer vertexBuffer;
@@ -34,11 +34,18 @@ public class Triangle {
 
         // number of coordinates per vertex in this array
         static final int COORDS_PER_VERTEX = 3;
-        static float triangleCoords[] = { // in counterclockwise order:
+        /*static float triangleCoords[] = { // in counterclockwise order:
              0.0f,  0.622008459f, 0.0f,   // top
             -0.5f, -0.311004243f, 0.0f,   // bottom left
              0.5f, -0.311004243f, 0.0f    // bottom right
-        };
+        };*/
+        static float triangleCoords[] = {
+        	-0.25f,  -0.25f, 0.0f,
+        	  0.0f,    0.0f, 0.0f,
+        	  0.0f,    0.5f, 0.0f,
+        	  0.25f, -0.25f, 0.0f
+        	  };
+
         private final int vertexCount = triangleCoords.length / COORDS_PER_VERTEX;
         private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
 
@@ -103,7 +110,7 @@ public class Triangle {
             MyRenderer.checkGlError("glUniformMatrix4fv");
 
             // Draw the triangle
-            GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, vertexCount);
+            GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, vertexCount);
 
             // Disable vertex array
             GLES20.glDisableVertexAttribArray(mPositionHandle);
