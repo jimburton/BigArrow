@@ -58,6 +58,8 @@ public class MyMapActivity extends PlaceSearchActivity implements LocationListen
 	private LatLngBounds.Builder llbBuilder;
 	private PlacesAPISearch pSearch;
 	private HashMap<String, String> refsLookup;
+	
+	private float minDistance;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -147,8 +149,11 @@ public class MyMapActivity extends PlaceSearchActivity implements LocationListen
 				llbBuilder.include(ll);
 				refsLookup.put(place.name, place.reference);
 			}
-			map.animateCamera(CameraUpdateFactory.newLatLngBounds(
-					llbBuilder.build(), 20));
+			
+			LatLngBounds llb = llbBuilder.build();
+			map.animateCamera(CameraUpdateFactory.newLatLngBounds(llb, 20));
+			minDistance = distanceBetween(llb.northeast, llb.southwest) / 4.0f;
+			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, minDistance, this);
 		}
 		myMarker.showInfoWindow();
 	}
