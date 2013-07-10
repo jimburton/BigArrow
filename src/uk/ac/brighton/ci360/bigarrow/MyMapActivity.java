@@ -58,8 +58,6 @@ public class MyMapActivity extends PlaceSearchActivity implements LocationListen
 	private LatLngBounds.Builder llbBuilder;
 	private PlacesAPISearch pSearch;
 	private HashMap<String, String> refsLookup;
-	
-	private float minDistance;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -152,7 +150,8 @@ public class MyMapActivity extends PlaceSearchActivity implements LocationListen
 			
 			LatLngBounds llb = llbBuilder.build();
 			map.animateCamera(CameraUpdateFactory.newLatLngBounds(llb, 20));
-			minDistance = distanceBetween(llb.northeast, llb.southwest) / 4.0f;
+			float minDistance = distanceBetween(llb.northeast, llb.southwest) / 4.0f;
+			locationManager.removeUpdates(this);
 			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, minDistance, this);
 		}
 		myMarker.showInfoWindow();
@@ -168,7 +167,6 @@ public class MyMapActivity extends PlaceSearchActivity implements LocationListen
 	public void onLocationChanged(Location location) {
 		myLatLng = new LatLng(location.getLatitude(), location.getLongitude());
 		SearchEstab e = SharedPrefsActivity.getSearchType(this);
-		//This needs to be done relative to the bounds of the map
 		pSearch.search(myLocation, new SearchEstab[] { e },
 				SearchType.MANY);
 	}
