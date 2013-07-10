@@ -24,7 +24,7 @@ public class MyRenderer implements GLSurfaceView.Renderer {
     private final float[] mVMatrix = new float[16];
     private final float[] mRotationMatrix = new float[16];
  // Declare as volatile because we are updating it from another thread
-    public volatile float mAngle;
+    private volatile float mAngle;
 
 	public void onSurfaceCreated(GL10 gl, EGLConfig config) {
 		// Set the background frame color
@@ -48,9 +48,10 @@ public class MyRenderer implements GLSurfaceView.Renderer {
         //square.draw(mMVPMatrix);
 
         // Create a rotation for the triangle
-        long time = SystemClock.uptimeMillis() % 4000L;
-        mAngle = 0.090f * ((int) time);
-        Matrix.setRotateM(mRotationMatrix, 0, mAngle, 0, 0, -1.0f);
+        //long time = SystemClock.uptimeMillis() % 4000L;
+        //setAngle(0.090f * ((int) time));
+        Log.d(TAG,  "arrow angle: "+getAngle());
+        Matrix.setRotateM(mRotationMatrix, 0, getAngle(), 0, 0, -1.0f);
 
         // Combine the rotation matrix with the projection and camera view
         Matrix.multiplyMM(mMVPMatrix, 0, mRotationMatrix, 0, mMVPMatrix, 0);
@@ -102,5 +103,13 @@ public class MyRenderer implements GLSurfaceView.Renderer {
             throw new RuntimeException(glOperation + ": glError " + error);
         }
     }
+
+	public float getAngle() {
+		return mAngle;
+	}
+
+	public void setAngle(float mAngle) {
+		this.mAngle = mAngle;
+	}
 
 }

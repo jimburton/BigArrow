@@ -9,12 +9,12 @@ import uk.ac.brighton.ci360.bigarrow.places.PlacesList;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.hardware.Camera;
+import android.hardware.GeomagneticField;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Location;
-import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Surface;
@@ -24,27 +24,28 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.TextView;
 
 public class BigArrowGLES20Activity extends PlaceSearchActivity {
-	
+
 	private SurfaceView cameraPreview;
 	private SurfaceHolder previewHolder;
-	//private ArrowView arrowView;
+	// private ArrowView arrowView;
 	private Camera camera;
 	private boolean inPreview;
-	
-	private GLSurfaceView mGLView;
+	private Location targetLocation;
+
+	private MyGLSurfaceView mGLView;
 
 	private final static String TAG = "BigArrow";
 	private SensorManager sensorManager;
 
 	private int orientationSensor;
 	private float headingAngle;
-	//private float pitchAngle;
-	//private float rollAngle;
+	// private float pitchAngle;
+	// private float rollAngle;
 
 	private int accelerometerSensor;
-	//private float xAxis;
+	// private float xAxis;
 	private TextView nearestPubLabel;
-	
+
 	protected SearchType firstSearchType = SearchType.SINGLE;
 
 	@SuppressWarnings("deprecation")
@@ -68,14 +69,15 @@ public class BigArrowGLES20Activity extends PlaceSearchActivity {
 
 		cameraPreview = (SurfaceView) findViewById(R.id.cameraPreview);
 		mGLView = new MyGLSurfaceView(this);
-        addContentView(mGLView, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+		addContentView(mGLView, new LayoutParams(LayoutParams.MATCH_PARENT,
+				LayoutParams.MATCH_PARENT));
 		previewHolder = cameraPreview.getHolder();
 		previewHolder.addCallback(surfaceCallback);
 		previewHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
 		nearestPubLabel = (TextView) findViewById(R.id.nearest_place_label);
-		nearestPubLabel.setText(R.string.bigarrow_searching); 
-	
+		nearestPubLabel.setText(R.string.bigarrow_searching);
+
 	}
 
 	final SensorEventListener sensorEventListener = new SensorEventListener() {
@@ -83,10 +85,12 @@ public class BigArrowGLES20Activity extends PlaceSearchActivity {
 		public void onSensorChanged(SensorEvent sensorEvent) {
 			if (sensorEvent.sensor.getType() == Sensor.TYPE_ORIENTATION) {
 				headingAngle = sensorEvent.values[0];
-				//pitchAngle = sensorEvent.values[1];
-				//rollAngle = sensorEvent.values[2];
-				
-			    //arrowView.updateData(headingAngle);
+				updateAngleToNearestPlace();
+				Log.d(TAG, "heading angle: " + headingAngle);
+				// pitchAngle = sensorEvent.values[1];
+				// rollAngle = sensorEvent.values[2];
+
+				// arrowView.updateData(headingAngle);
 
 				// Log.d(TAG, "Heading: " + String.valueOf(headingAngle));
 				// Log.d(TAG, "Pitch: " + String.valueOf(pitchAngle));
@@ -95,7 +99,7 @@ public class BigArrowGLES20Activity extends PlaceSearchActivity {
 			}
 
 			else if (sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-				//xAxis = sensorEvent.values[0];
+				// xAxis = sensorEvent.values[0];
 
 				// Log.d(TAG, "X Axis: " + String.valueOf(xAxis));
 				// Log.d(TAG, "Y Axis: " +
@@ -104,7 +108,7 @@ public class BigArrowGLES20Activity extends PlaceSearchActivity {
 				// String.valueOf(sensorEvent.values[2]));
 
 				// nearestPubLabel.setText(String.valueOf(xAxis));
-			} 
+			}
 		}
 
 		public void onAccuracyChanged(Sensor sensor, int accuracy) {
@@ -115,7 +119,8 @@ public class BigArrowGLES20Activity extends PlaceSearchActivity {
 	@Override
 	public void onResume() {
 		super.onResume();
-		if(mGLView != null) mGLView.onResume();
+		if (mGLView != null)
+			mGLView.onResume();
 		sensorManager.registerListener(sensorEventListener,
 				sensorManager.getDefaultSensor(orientationSensor),
 				SensorManager.SENSOR_DELAY_NORMAL);
@@ -137,7 +142,8 @@ public class BigArrowGLES20Activity extends PlaceSearchActivity {
 		inPreview = false;
 
 		super.onPause();
-		if(mGLView != null) mGLView.onPause();
+		if (mGLView != null)
+			mGLView.onPause();
 	}
 
 	private Camera.Size getBestPreviewSize(int width, int height,
@@ -223,12 +229,37 @@ public class BigArrowGLES20Activity extends PlaceSearchActivity {
 	};
 
 	@Override
-	public void updateNearestPlace(Place place, Location location, float distance) {
+	public void updateNearestPlace(Place place, Location location,
+			float distance) {
+		targetLocation = location;
 		nearestPubLabel.setText(place.name);
-		if(!place.id.equals(Place.NO_RESULT)) {
-			nearestPubLabel.append(": " + (int)distance + "m");
-			//if (myLocation != null) arrowView.updateData(getAngle(location));
+		if (!place.id.equals(Place.NO_RESULT)) {
+			nearestPubLabel.append(": " + (int) distance + "m");
+
+			// arrowView.updateData(getAngle(location));
+			updateAngleToNearestPlace();
 		}
+	}
+
+	private void updateAngleToNearestPlace() {
+		if (myLocation != null && targetLocation != null) {
+			float myBearing = normalizeDegree(myLocation.bearingTo(targetLocation));
+			Log.d(TAG, "myBearing: " + myBearing);
+			GeomagneticField geoField = new GeomagneticField(Double.valueOf(
+					myLocation.getLatitude()).floatValue(), Double.valueOf(
+					myLocation.getLongitude()).floatValue(), Double.valueOf(
+					myLocation.getAltitude()).floatValue(),
+					System.currentTimeMillis());
+			float realHeading = headingAngle - geoField.getDeclination();
+			Log.d(TAG, "realHeading: " + realHeading);
+			realHeading = normalizeDegree(myBearing - headingAngle);
+			mGLView.getRenderer().setAngle(realHeading);
+			Log.d(TAG, "angle to location: " + realHeading);
+		}
+	}
+
+	private float normalizeDegree(float value) {
+		return (value < 0) ? value + 360 : value;
 	}
 
 	@Override
@@ -241,26 +272,26 @@ public class BigArrowGLES20Activity extends PlaceSearchActivity {
 	public void onStatusChanged(String provider, int status, Bundle extras) {
 		// TODO Auto-generated method stub
 	}
-	
+
 	private float getAngle(Location target) {
-	    float angle = (float) Math.toDegrees(Math.atan2(target.getLongitude() - myLocation.getLongitude(), 
-	    		target.getLatitude() - myLocation.getLatitude()));
-	    if(angle < 0){
-	        angle += 360;
-	    }
-	    return angle;
+		float angle = (float) Math.toDegrees(Math.atan2(target.getLongitude()
+				- myLocation.getLongitude(),
+				target.getLatitude() - myLocation.getLatitude()));
+		if (angle < 0) {
+			angle += 360;
+		}
+		return angle;
 	}
 
 	@Override
 	public void updatePlaceDetails(PlaceDetails details) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
-	public void updatePhotos(ArrayList<Bitmap> results) { 
+	public void updatePhotos(ArrayList<Bitmap> results) {
 		// TODO Auto-generated method stub
-		
+
 	}
 }
-

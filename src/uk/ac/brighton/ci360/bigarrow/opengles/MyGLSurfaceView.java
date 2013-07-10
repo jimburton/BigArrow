@@ -6,6 +6,8 @@ import android.opengl.GLSurfaceView;
 
 public class MyGLSurfaceView extends GLSurfaceView {
 
+	private MyRenderer renderer;
+	
 	public MyGLSurfaceView(Context context) {
 		super(context);
 
@@ -15,8 +17,13 @@ public class MyGLSurfaceView extends GLSurfaceView {
 		getHolder().setFormat(PixelFormat.TRANSLUCENT);
 
 		// setRenderer(new CubeRenderer(true));
-		setRenderer(new MyRenderer());
+		renderer = new MyRenderer();
+		setRenderer(renderer);
 		// setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
 
+	}
+	
+	public MyRenderer getRenderer() {
+		return renderer;
 	}
 }

@@ -31,7 +31,7 @@ import com.google.android.gms.maps.model.LatLng;
 public abstract class PlaceSearchActivity extends Activity implements
 		LocationListener, PlaceSearchRequester {
 
-	protected final boolean PLACES_SEARCH_ON = false;
+	protected final boolean PLACES_SEARCH_ON = true;
 
 	protected LocationManager locationManager;
 	protected Location myLocation;
