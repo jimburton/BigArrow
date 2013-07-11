@@ -60,7 +60,7 @@ public class MyRenderer implements GLSurfaceView.Renderer {
 
         // Create two rotations for the triangle, to point towards the target and to 
         // skew it in perspective
-        Matrix.setRotateM(mRotationMatrix, 0, headingAngle, 0, 0, -1.0f);
+        Matrix.setRotateM(mRotationMatrix, 0, headingAngle, 0, 0, 1.0f);
         Matrix.setRotateM(mPitchMatrix, 0, pitchAngle, 1.0f, 0, 0);
 
         // Combine the rotation matrix with the projection and camera view

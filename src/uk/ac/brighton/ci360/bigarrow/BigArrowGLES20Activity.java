@@ -88,15 +88,7 @@ public class BigArrowGLES20Activity extends PlaceSearchActivity {
 				headingAngle = sensorEvent.values[0];
 				pitchAngle = Math.abs(sensorEvent.values[1]);
 				updateArrowView();
-				//Log.d(TAG, "heading angle: " + headingAngle);
 				//float rollAngle = sensorEvent.values[2];
-
-				// arrowView.updateData(headingAngle);
-
-				// Log.d(TAG, "Heading: " + String.valueOf(headingAngle));
-				//Log.d(TAG, "Pitch: " + String.valueOf(pitchAngle));
-				//Log.d(TAG, "Roll: " + String.valueOf(rollAngle));
-
 			}
 
 			else if (sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
