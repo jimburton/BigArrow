@@ -1,23 +1,15 @@
 package uk.ac.brighton.ci360.bigarrow;
 
-/**
- * This activity renders the output from the camera onto a 
- * SurfaceView, then overlays an ArrowView component on top of that.
- * 
- * Copyright (c) 2013 The BigArrow authors (see the file AUTHORS).
- * See the file LICENSE for copying permission.
- * 
- * @author jb259
- */
 import java.util.ArrayList;
 
+import uk.ac.brighton.ci360.bigarrow.opengles.MyGLSurfaceView;
 import uk.ac.brighton.ci360.bigarrow.places.Place;
 import uk.ac.brighton.ci360.bigarrow.places.PlaceDetails;
 import uk.ac.brighton.ci360.bigarrow.places.PlacesList;
 import android.app.Activity;
 import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 import android.hardware.Camera;
+import android.hardware.GeomagneticField;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -28,29 +20,33 @@ import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.TextView;
 
-public class BigArrowActivity extends PlaceSearchActivity {
-	
+public class BigArrowGLES20Activity extends PlaceSearchActivity {
+
 	private SurfaceView cameraPreview;
 	private SurfaceHolder previewHolder;
-	private ArrowView arrowView;
+	// private ArrowView arrowView;
 	private Camera camera;
 	private boolean inPreview;
+	private Location targetLocation;
+
+	private MyGLSurfaceView mGLView;
 
 	private final static String TAG = "BigArrow";
 	private SensorManager sensorManager;
 
 	private int orientationSensor;
 	private float headingAngle;
-	//private float pitchAngle;
-	//private float rollAngle;
+	private float pitchAngle;
+	// private float rollAngle;
 
 	private int accelerometerSensor;
-	//private float xAxis;
+	// private float xAxis;
 	private TextView nearestPubLabel;
-	
+
 	protected SearchType firstSearchType = SearchType.SINGLE;
 
 	@SuppressWarnings("deprecation")
@@ -73,36 +69,38 @@ public class BigArrowActivity extends PlaceSearchActivity {
 		inPreview = false;
 
 		cameraPreview = (SurfaceView) findViewById(R.id.cameraPreview);
-		arrowView = new ArrowView(this);
-		addContentView(arrowView, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+		mGLView = (MyGLSurfaceView) findViewById(R.id.arrowView);
 		previewHolder = cameraPreview.getHolder();
 		previewHolder.addCallback(surfaceCallback);
 		previewHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
 		nearestPubLabel = (TextView) findViewById(R.id.nearest_place_label);
-		//nearestPubLabel.setText(R.string.bigarrow_searching);
-		nearestPubLabel.setText("BANANAS");
-	
+		nearestPubLabel.setText(R.string.bigarrow_searching);
+		nearestPubLabel.setVisibility(View.VISIBLE);
+
 	}
 
 	final SensorEventListener sensorEventListener = new SensorEventListener() {
 		@SuppressWarnings("deprecation")
 		public void onSensorChanged(SensorEvent sensorEvent) {
+
 			if (sensorEvent.sensor.getType() == Sensor.TYPE_ORIENTATION) {
 				headingAngle = sensorEvent.values[0];
-				//pitchAngle = sensorEvent.values[1];
-				//rollAngle = sensorEvent.values[2];
-				
-			    arrowView.updateData(headingAngle);
+				pitchAngle = Math.abs(sensorEvent.values[1]);
+				updateArrowView();
+				//Log.d(TAG, "heading angle: " + headingAngle);
+				//float rollAngle = sensorEvent.values[2];
+
+				// arrowView.updateData(headingAngle);
 
 				// Log.d(TAG, "Heading: " + String.valueOf(headingAngle));
-				// Log.d(TAG, "Pitch: " + String.valueOf(pitchAngle));
-				// Log.d(TAG, "Roll: " + String.valueOf(rollAngle));
+				//Log.d(TAG, "Pitch: " + String.valueOf(pitchAngle));
+				//Log.d(TAG, "Roll: " + String.valueOf(rollAngle));
 
 			}
 
 			else if (sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-				//xAxis = sensorEvent.values[0];
+				// xAxis = sensorEvent.values[0];
 
 				// Log.d(TAG, "X Axis: " + String.valueOf(xAxis));
 				// Log.d(TAG, "Y Axis: " +
@@ -111,7 +109,7 @@ public class BigArrowActivity extends PlaceSearchActivity {
 				// String.valueOf(sensorEvent.values[2]));
 
 				// nearestPubLabel.setText(String.valueOf(xAxis));
-			} 
+			}
 		}
 
 		public void onAccuracyChanged(Sensor sensor, int accuracy) {
@@ -122,6 +120,8 @@ public class BigArrowActivity extends PlaceSearchActivity {
 	@Override
 	public void onResume() {
 		super.onResume();
+		if (mGLView != null)
+			mGLView.onResume();
 		sensorManager.registerListener(sensorEventListener,
 				sensorManager.getDefaultSensor(orientationSensor),
 				SensorManager.SENSOR_DELAY_NORMAL);
@@ -143,6 +143,8 @@ public class BigArrowActivity extends PlaceSearchActivity {
 		inPreview = false;
 
 		super.onPause();
+		if (mGLView != null)
+			mGLView.onPause();
 	}
 
 	private Camera.Size getBestPreviewSize(int width, int height,
@@ -228,12 +230,38 @@ public class BigArrowActivity extends PlaceSearchActivity {
 	};
 
 	@Override
-	public void updateNearestPlace(Place place, Location location, float distance) {
+	public void updateNearestPlace(Place place, Location location,
+			float distance) {
+		targetLocation = location;
 		nearestPubLabel.setText(place.name);
-		if(!place.id.equals(Place.NO_RESULT)) {
-			nearestPubLabel.append(": " + (int)distance + "m");
-			if (myLocation != null) arrowView.updateData(getAngle(location));
+		if (!place.id.equals(Place.NO_RESULT)) {
+			nearestPubLabel.append(": " + (int) distance + "m");
+
+			// arrowView.updateData(getAngle(location));
+			updateArrowView();
 		}
+	}
+
+	private void updateArrowView() {
+		if (myLocation != null && targetLocation != null) {
+			float myBearing = normalizeDegree(myLocation.bearingTo(targetLocation));
+			Log.d(TAG, "myBearing: " + myBearing);
+			GeomagneticField geoField = new GeomagneticField(Double.valueOf(
+					myLocation.getLatitude()).floatValue(), Double.valueOf(
+					myLocation.getLongitude()).floatValue(), Double.valueOf(
+					myLocation.getAltitude()).floatValue(),
+					System.currentTimeMillis());
+			float realHeading = headingAngle - geoField.getDeclination();
+			Log.d(TAG, "realHeading: " + realHeading);
+			realHeading = normalizeDegree(myBearing - headingAngle);
+			mGLView.getRenderer().setHeading(realHeading);
+			mGLView.getRenderer().setPitch(pitchAngle);
+			Log.d(TAG, "angle to location: " + realHeading);
+		}
+	}
+
+	private float normalizeDegree(float value) {
+		return (value < 0) ? -value + 180 : value;
 	}
 
 	@Override
@@ -246,25 +274,26 @@ public class BigArrowActivity extends PlaceSearchActivity {
 	public void onStatusChanged(String provider, int status, Bundle extras) {
 		// TODO Auto-generated method stub
 	}
-	
+
 	private float getAngle(Location target) {
-	    float angle = (float) Math.toDegrees(Math.atan2(target.getLongitude() - myLocation.getLongitude(), 
-	    		target.getLatitude() - myLocation.getLatitude()));
-	    if(angle < 0){
-	        angle += 360;
-	    }
-	    return angle;
+		float angle = (float) Math.toDegrees(Math.atan2(target.getLongitude()
+				- myLocation.getLongitude(),
+				target.getLatitude() - myLocation.getLatitude()));
+		if (angle < 0) {
+			angle += 360;
+		}
+		return angle;
 	}
 
 	@Override
 	public void updatePlaceDetails(PlaceDetails details) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void updatePhotos(ArrayList<Bitmap> results) {
 		// TODO Auto-generated method stub
-		
+
 	}
 }
