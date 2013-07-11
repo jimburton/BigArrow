@@ -16,10 +16,12 @@
 
 	<TextView
 	    android:id="@+id/nearest_place_label"
-	    android:layout_width="wrap_content"
+	    android:layout_width="match_parent"
 	    android:layout_height="wrap_content"
 	    android:layout_alignParentBottom="true"
  		android:layout_centerHorizontal="true"
+ 		android:background="@color/color_bigarrow_bg"
+ 		android:gravity="center"
  		android:textColor="#000"
  		android:textSize="30sp"
 	    android:text="@string/empty"  />
