@@ -150,8 +150,12 @@ public class MyMapActivity extends PlaceSearchActivity implements LocationListen
 				llbBuilder.include(ll);
 				refsLookup.put(place.name, place.reference);
 			}
-			map.animateCamera(CameraUpdateFactory.newLatLngBounds(
-					llbBuilder.build(), 20));
+			
+			LatLngBounds llb = llbBuilder.build();
+			map.animateCamera(CameraUpdateFactory.newLatLngBounds(llb, 20));
+			float minDistance = distanceBetween(llb.northeast, llb.southwest) / 4.0f;
+			locationManager.removeUpdates(this);
+			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, minDistance, this);
 		}
 		myMarker.showInfoWindow();
 	}
@@ -166,7 +170,6 @@ public class MyMapActivity extends PlaceSearchActivity implements LocationListen
 	public void onLocationChanged(Location location) {
 		myLatLng = new LatLng(location.getLatitude(), location.getLongitude());
 		SearchEstab e = SharedPrefsActivity.getSearchType(this);
-		//This needs to be done relative to the bounds of the map
 		pSearch.search(myLocation, new SearchEstab[] { e },
 				SearchType.MANY);
 	}
