@@ -21,14 +21,12 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
-import android.view.ViewGroup.LayoutParams;
 import android.widget.TextView;
 
 public class BigArrowGLES20Activity extends PlaceSearchActivity {
 
 	private SurfaceView cameraPreview;
 	private SurfaceHolder previewHolder;
-	// private ArrowView arrowView;
 	private Camera camera;
 	private boolean inPreview;
 	private Location targetLocation;
@@ -41,10 +39,8 @@ public class BigArrowGLES20Activity extends PlaceSearchActivity {
 	private int orientationSensor;
 	private float headingAngle;
 	private float pitchAngle;
-	// private float rollAngle;
 
 	private int accelerometerSensor;
-	// private float xAxis;
 	private TextView nearestPubLabel;
 
 	protected SearchType firstSearchType = SearchType.SINGLE;
@@ -90,18 +86,6 @@ public class BigArrowGLES20Activity extends PlaceSearchActivity {
 				updateArrowView();
 				//float rollAngle = sensorEvent.values[2];
 			}
-
-			else if (sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-				// xAxis = sensorEvent.values[0];
-
-				// Log.d(TAG, "X Axis: " + String.valueOf(xAxis));
-				// Log.d(TAG, "Y Axis: " +
-				// String.valueOf(sensorEvent.values[1]));
-				// Log.d(TAG, "Z Axis: " +
-				// String.valueOf(sensorEvent.values[2]));
-
-				// nearestPubLabel.setText(String.valueOf(xAxis));
-			}
 		}
 
 		public void onAccuracyChanged(Sensor sensor, int accuracy) {
@@ -139,10 +123,16 @@ public class BigArrowGLES20Activity extends PlaceSearchActivity {
 			mGLView.onPause();
 	}
 
+	/**
+	 * Get the best preview size this device is capable of.
+	 * @param width
+	 * @param height
+	 * @param parameters
+	 * @return
+	 */
 	private Camera.Size getBestPreviewSize(int width, int height,
 			Camera.Parameters parameters) {
 		Camera.Size result = null;
-
 		for (Camera.Size size : parameters.getSupportedPreviewSizes()) {
 			if (size.width <= width && size.height <= height) {
 				if (result == null) {
@@ -161,8 +151,13 @@ public class BigArrowGLES20Activity extends PlaceSearchActivity {
 		return (result);
 	}
 
-	public static void setCameraDisplayOrientation(Activity activity,
-			int cameraId, android.hardware.Camera camera) {
+	/**
+	 * Change the camera preview orientation when the device orientation changes.
+	 * @param activity
+	 * @param cameraId
+	 * @param camera
+	 */
+	public static void setCameraDisplayOrientation(Activity activity, int cameraId, Camera camera) {
 		android.hardware.Camera.CameraInfo info = new android.hardware.Camera.CameraInfo();
 		android.hardware.Camera.getCameraInfo(cameraId, info);
 		int rotation = activity.getWindowManager().getDefaultDisplay()
@@ -228,30 +223,33 @@ public class BigArrowGLES20Activity extends PlaceSearchActivity {
 		nearestPubLabel.setText(place.name);
 		if (!place.id.equals(Place.NO_RESULT)) {
 			nearestPubLabel.append(": " + (int) distance + "m");
-
-			// arrowView.updateData(getAngle(location));
 			updateArrowView();
 		}
 	}
 
+	/**
+	 * Calculate the angles of rotation and pitch to pass on the the MyGLSurfaceView
+	 */
 	private void updateArrowView() {
 		if (myLocation != null && targetLocation != null) {
 			float myBearing = normalizeDegree(myLocation.bearingTo(targetLocation));
-			Log.d(TAG, "myBearing: " + myBearing);
 			GeomagneticField geoField = new GeomagneticField(Double.valueOf(
 					myLocation.getLatitude()).floatValue(), Double.valueOf(
 					myLocation.getLongitude()).floatValue(), Double.valueOf(
 					myLocation.getAltitude()).floatValue(),
 					System.currentTimeMillis());
 			float realHeading = headingAngle - geoField.getDeclination();
-			Log.d(TAG, "realHeading: " + realHeading);
 			realHeading = normalizeDegree(myBearing - headingAngle);
 			mGLView.getRenderer().setHeading(realHeading);
 			mGLView.getRenderer().setPitch(pitchAngle);
-			Log.d(TAG, "angle to location: " + realHeading);
 		}
 	}
 
+	/**
+	 * Convert heading angles and bearings from -180 to 180 scale to 0 to 360 scale.
+	 * @param value
+	 * @return
+	 */
 	private float normalizeDegree(float value) {
 		return (value < 0) ? -value + 180 : value;
 	}
@@ -265,16 +263,6 @@ public class BigArrowGLES20Activity extends PlaceSearchActivity {
 	@Override
 	public void onStatusChanged(String provider, int status, Bundle extras) {
 		// TODO Auto-generated method stub
-	}
-
-	private float getAngle(Location target) {
-		float angle = (float) Math.toDegrees(Math.atan2(target.getLongitude()
-				- myLocation.getLongitude(),
-				target.getLatitude() - myLocation.getLatitude()));
-		if (angle < 0) {
-			angle += 360;
-		}
-		return angle;
 	}
 
 	@Override
