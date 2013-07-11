@@ -83,6 +83,7 @@ public class BigArrowGLES20Activity extends PlaceSearchActivity {
 	final SensorEventListener sensorEventListener = new SensorEventListener() {
 		@SuppressWarnings("deprecation")
 		public void onSensorChanged(SensorEvent sensorEvent) {
+
 			if (sensorEvent.sensor.getType() == Sensor.TYPE_ORIENTATION) {
 				headingAngle = sensorEvent.values[0];
 				updateAngleToNearestPlace();
@@ -259,7 +260,7 @@ public class BigArrowGLES20Activity extends PlaceSearchActivity {
 	}
 
 	private float normalizeDegree(float value) {
-		return (value < 0) ? value + 360 : value;
+		return (value < 0) ? -value + 180 : value;
 	}
 
 	@Override
