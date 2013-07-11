@@ -20,6 +20,7 @@ import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.TextView;
 
@@ -39,7 +40,7 @@ public class BigArrowGLES20Activity extends PlaceSearchActivity {
 
 	private int orientationSensor;
 	private float headingAngle;
-	// private float pitchAngle;
+	private float pitchAngle;
 	// private float rollAngle;
 
 	private int accelerometerSensor;
@@ -68,15 +69,14 @@ public class BigArrowGLES20Activity extends PlaceSearchActivity {
 		inPreview = false;
 
 		cameraPreview = (SurfaceView) findViewById(R.id.cameraPreview);
-		mGLView = new MyGLSurfaceView(this);
-		addContentView(mGLView, new LayoutParams(LayoutParams.MATCH_PARENT,
-				LayoutParams.MATCH_PARENT));
+		mGLView = (MyGLSurfaceView) findViewById(R.id.arrowView);
 		previewHolder = cameraPreview.getHolder();
 		previewHolder.addCallback(surfaceCallback);
 		previewHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
 		nearestPubLabel = (TextView) findViewById(R.id.nearest_place_label);
 		nearestPubLabel.setText(R.string.bigarrow_searching);
+		nearestPubLabel.setVisibility(View.VISIBLE);
 
 	}
 
@@ -86,16 +86,16 @@ public class BigArrowGLES20Activity extends PlaceSearchActivity {
 
 			if (sensorEvent.sensor.getType() == Sensor.TYPE_ORIENTATION) {
 				headingAngle = sensorEvent.values[0];
-				updateAngleToNearestPlace();
-				Log.d(TAG, "heading angle: " + headingAngle);
-				// pitchAngle = sensorEvent.values[1];
-				// rollAngle = sensorEvent.values[2];
+				pitchAngle = Math.abs(sensorEvent.values[1]);
+				updateArrowView();
+				//Log.d(TAG, "heading angle: " + headingAngle);
+				//float rollAngle = sensorEvent.values[2];
 
 				// arrowView.updateData(headingAngle);
 
 				// Log.d(TAG, "Heading: " + String.valueOf(headingAngle));
-				// Log.d(TAG, "Pitch: " + String.valueOf(pitchAngle));
-				// Log.d(TAG, "Roll: " + String.valueOf(rollAngle));
+				//Log.d(TAG, "Pitch: " + String.valueOf(pitchAngle));
+				//Log.d(TAG, "Roll: " + String.valueOf(rollAngle));
 
 			}
 
@@ -238,11 +238,11 @@ public class BigArrowGLES20Activity extends PlaceSearchActivity {
 			nearestPubLabel.append(": " + (int) distance + "m");
 
 			// arrowView.updateData(getAngle(location));
-			updateAngleToNearestPlace();
+			updateArrowView();
 		}
 	}
 
-	private void updateAngleToNearestPlace() {
+	private void updateArrowView() {
 		if (myLocation != null && targetLocation != null) {
 			float myBearing = normalizeDegree(myLocation.bearingTo(targetLocation));
 			Log.d(TAG, "myBearing: " + myBearing);
@@ -254,7 +254,8 @@ public class BigArrowGLES20Activity extends PlaceSearchActivity {
 			float realHeading = headingAngle - geoField.getDeclination();
 			Log.d(TAG, "realHeading: " + realHeading);
 			realHeading = normalizeDegree(myBearing - headingAngle);
-			mGLView.getRenderer().setAngle(realHeading);
+			mGLView.getRenderer().setHeading(realHeading);
+			mGLView.getRenderer().setPitch(pitchAngle);
 			Log.d(TAG, "angle to location: " + realHeading);
 		}
 	}

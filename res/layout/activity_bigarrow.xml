@@ -8,6 +8,11 @@
 		android:id="@+id/cameraPreview"
 		android:layout_width="fill_parent"
 		android:layout_height="fill_parent" />
+	
+	<uk.ac.brighton.ci360.bigarrow.opengles.MyGLSurfaceView 
+	    android:id="@+id/arrowView"
+        android:layout_width="fill_parent"
+		android:layout_height="fill_parent"/>
 
 	<TextView
 	    android:id="@+id/nearest_place_label"

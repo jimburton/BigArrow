@@ -1,5 +1,12 @@
 package uk.ac.brighton.ci360.bigarrow.opengles;
-
+/**
+ * The renderer which draws the arrow, handling rotations etc.
+ * 
+ * Copyright (c) 2013 The BigArrow authors (see the file AUTHORS).
+ * See the file LICENSE for copying permission.
+ * 
+ * @author jb259
+ */
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
@@ -15,7 +22,7 @@ public class MyRenderer implements GLSurfaceView.Renderer {
 	private static final String TAG = "MyRenderer";
 
 
-	private Triangle triangle;
+	private Arrow triangle;
 	//private Square square;
 
 	
@@ -23,15 +30,19 @@ public class MyRenderer implements GLSurfaceView.Renderer {
     private final float[] mProjMatrix = new float[16];
     private final float[] mVMatrix = new float[16];
     private final float[] mRotationMatrix = new float[16];
+    private final float[] mPitchMatrix = new float[16];
  // Declare as volatile because we are updating it from another thread
-    private volatile float mAngle;
+    private volatile float headingAngle;
+
+
+	private float pitchAngle;
 
 	public void onSurfaceCreated(GL10 gl, EGLConfig config) {
 		// Set the background frame color
 		gl.glClearColor(0, 0, 0, 0);
 
 		//square   = new Square();
-		triangle = new Triangle();
+		triangle = new Arrow();
 	}
 
 	public void onDrawFrame(GL10 unused) {
@@ -47,14 +58,14 @@ public class MyRenderer implements GLSurfaceView.Renderer {
         // Draw square
         //square.draw(mMVPMatrix);
 
-        // Create a rotation for the triangle
-        //long time = SystemClock.uptimeMillis() % 4000L;
-        //setAngle(0.090f * ((int) time));
-        Log.d(TAG,  "arrow angle: "+getAngle());
-        Matrix.setRotateM(mRotationMatrix, 0, getAngle(), 0, 0, -1.0f);
+        // Create two rotations for the triangle, to point towards the target and to 
+        // skew it in perspective
+        Matrix.setRotateM(mRotationMatrix, 0, headingAngle, 0, 0, -1.0f);
+        Matrix.setRotateM(mPitchMatrix, 0, pitchAngle, 1.0f, 0, 0);
 
         // Combine the rotation matrix with the projection and camera view
         Matrix.multiplyMM(mMVPMatrix, 0, mRotationMatrix, 0, mMVPMatrix, 0);
+        Matrix.multiplyMM(mMVPMatrix, 0, mPitchMatrix, 0, mMVPMatrix, 0);
 
         // Draw triangle
         triangle.draw(mMVPMatrix);
@@ -105,11 +116,16 @@ public class MyRenderer implements GLSurfaceView.Renderer {
     }
 
 	public float getAngle() {
-		return mAngle;
+		return headingAngle;
 	}
 
-	public void setAngle(float mAngle) {
-		this.mAngle = mAngle;
+	public void setHeading(float mAngle) {
+		this.headingAngle = mAngle;
+	}
+
+	public void setPitch(float pitchAngle) {
+		this.pitchAngle = pitchAngle;
+		
 	}
 
 }
