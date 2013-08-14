@@ -68,24 +68,12 @@ public class MyMapActivity extends PlaceSearchActivity implements LocationListen
 		setContentView(R.layout.activity_map);
 
 		locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-		myLocation = locationManager
-				.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-		if (myLocation == null) {
-			myLocation = locationManager
-					.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-		}
+		myLocation = this.getMyLocation(locationManager);
 		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
 				10000, 50, this);
-				
-				
-		/**IF GPS DISABLED myLocation is still null and app will crash**/		
 		
-		myLatLng = new LatLng(myLocation.getLatitude(),
-				myLocation.getLongitude());
-
 		setUpMapIfNeeded();
-
-		map.moveCamera(CameraUpdateFactory.newLatLngZoom(myLatLng, 15));
+	
 		map.setOnInfoWindowClickListener(new OnInfoWindowClickListener() {
 			@Override
 			public void onInfoWindowClick(Marker marker) {
@@ -101,10 +89,8 @@ public class MyMapActivity extends PlaceSearchActivity implements LocationListen
 		});
 
 		pSearch = new PlacesAPISearch(this);
-		SearchEstab e = SharedPrefsActivity.getSearchType(this);
-		pSearch.search(myLocation, new SearchEstab[] { e },
-				SearchType.MANY);
 
+	    onLocationChanged(myLocation);
 	}
 
 	private void setUpMapIfNeeded() {
@@ -168,10 +154,13 @@ public class MyMapActivity extends PlaceSearchActivity implements LocationListen
 
 	@Override
 	public void onLocationChanged(Location location) {
-		myLatLng = new LatLng(location.getLatitude(), location.getLongitude());
-		SearchEstab e = SharedPrefsActivity.getSearchType(this);
-		pSearch.search(myLocation, new SearchEstab[] { e },
-				SearchType.MANY);
+	    if (location != null) {
+    		myLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+    		map.moveCamera(CameraUpdateFactory.newLatLngZoom(myLatLng, 15));
+    		SearchEstab e = SharedPrefsActivity.getSearchType(this);
+    		pSearch.search(myLocation, new SearchEstab[] { e },
+    				SearchType.MANY);
+	    }
 	}
 
 	@Override
@@ -182,13 +171,13 @@ public class MyMapActivity extends PlaceSearchActivity implements LocationListen
 
 	@Override
 	public void onProviderEnabled(String provider) {
-		// TODO Auto-generated method stub
+        // TODO Auto-generated method stub
 
 	}
 
 	@Override
 	public void onStatusChanged(String provider, int status, Bundle extras) {
-		// TODO Auto-generated method stub
+        // TODO Auto-generated method stub
 
 	}
 
@@ -196,6 +185,11 @@ public class MyMapActivity extends PlaceSearchActivity implements LocationListen
 	public void onResume() {
 		super.onResume();
 		setUpMapIfNeeded();
+		myLocation = this.getMyLocation(locationManager);
+		if (myLocation == null) 
+            getLocationServicesAlertDialog(this).show();
+		else
+		    onLocationChanged(myLocation);
 	}
 
 	@Override
