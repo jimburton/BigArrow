@@ -63,19 +63,13 @@ public abstract class PlaceSearchActivity extends Activity implements
 	@Override
 	public void onResume() {
 		super.onResume();
-		//register listeners in derived classes
-		//app resumed, manually re-check where we are, can be null - handle in derived classes!
-		//update the location for all derived classes 
 		myLocation = getMyLocation(locationManager);
 	}
 
 	@Override
 	public void onPause() {
 		super.onPause();
-		//if remove listener, location doesnt get updated
-		//when provider is enabled
-		//perhaps there's a better way
-		//locationManager.removeUpdates(this);
+		locationManager.removeUpdates(this);
 	}
 
 	@Override
@@ -216,7 +210,6 @@ public abstract class PlaceSearchActivity extends Activity implements
 		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialogInterface, int i) {
-				// Show location settings when the user acknowledges the alert dialog
 				Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
 				caller.startActivityForResult(intent, 0);
 			}
