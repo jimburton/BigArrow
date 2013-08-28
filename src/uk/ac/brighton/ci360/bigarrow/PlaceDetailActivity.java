@@ -31,7 +31,7 @@ public class PlaceDetailActivity extends PlaceSearchActivity {
 	public static final String OPEN = "open now";
 
 	PlaceDetails placeDetails;
-	ProgressDialog pDialog;
+	ProgressDialog pDialog;   
 
 	private TextView nameTV, openingHoursTV, addressTV, distanceTV;
 	private ExpandListAdapter adapter;
