@@ -25,7 +25,7 @@ public class Cache2<K, V extends Cacheable> {
     /**
      * Maximum number of key-value mappings that can be held in cache
      */
-    private final Integer CACHE_SIZE_LIMIT;
+    private final int sizeLimit;
     
     /**
      * Holds formatted query string as key which maps to places list value
@@ -47,8 +47,8 @@ public class Cache2<K, V extends Cacheable> {
      * @param limit size of cache
      */
     public Cache2(int limit) {
-        CACHE_SIZE_LIMIT = limit;
-        cache = new WeakHashMap<K, V>(CACHE_SIZE_LIMIT);
+        sizeLimit = limit;
+        cache = new WeakHashMap<K, V>(sizeLimit);
     }
     
     /**
@@ -65,7 +65,7 @@ public class Cache2<K, V extends Cacheable> {
      * @param value
      */
     public void store(K key, V value) {
-        if (queue.size() == CACHE_SIZE_LIMIT) {
+        if (queue.size() == sizeLimit) {
             cache.remove(queue.poll());
         }
         
@@ -108,7 +108,7 @@ public class Cache2<K, V extends Cacheable> {
      * @return maximum number of items that can be held in this cache
      */
     public int getLimit() {
-        return CACHE_SIZE_LIMIT;
+        return sizeLimit;
     }
     
     /**
