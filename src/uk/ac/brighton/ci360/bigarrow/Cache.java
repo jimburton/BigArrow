@@ -3,8 +3,6 @@ package uk.ac.brighton.ci360.bigarrow;
 import java.util.LinkedList;
 import java.util.WeakHashMap;
 
-import uk.ac.brighton.ci360.bigarrow.places.PlacesList;
-
 /**
  * This class saves information about searches
  * so that same search instead of loading data over network
@@ -13,26 +11,31 @@ import uk.ac.brighton.ci360.bigarrow.places.PlacesList;
  * Copyright (c) 2013 The BigArrow authors (see the file AUTHORS).
  * See the file LICENSE for copying permission.
  * 
- * @author Almas (ab607)
+ * @author Almas Baimagambetov (ab607)
  * 
  */
-public class Cache {
+public class Cache<V extends Cacheable> {
 
     /**
-     * Holds the Singleton instance of Cache.
-     */
-    private static final Cache instance = new Cache();
-    
-    /**
      * Maximum number of key-value mappings that can be held in cache
+     * This value is used by default when the limit is not specified
      */
-    public static final int CACHE_SIZE_LIMIT = 30;
+    private static final int DEFAULT_CACHE_SIZE_LIMIT = 30;
     
     /**
-     * Holds formatted query string as key which maps to places list value
-     * which would be returned if query was executed
+     * Maximum number of key-value mappings that can be held in this cache
      */
-    private final WeakHashMap<String, PlacesList> cache = new WeakHashMap<String, PlacesList>(CACHE_SIZE_LIMIT);
+    private int sizeLimit;
+    
+    /**
+     * Formatter used to format cache keys
+     */
+    private Formatter formatter;
+    
+    /**
+     * Actual key and value "holder"
+     */
+    private WeakHashMap<String, V> cache;
     
     /**
      * Provides means of identifying the least-recently accessed cache item
@@ -40,79 +43,94 @@ public class Cache {
      * First (head) element of this queue is the key
      * of the least-recently cached entry
      */
-    private final LinkedList<String> queue = new LinkedList<String>();
+    private LinkedList<String> queue = new LinkedList<String>();
     
     /**
-     * Do not let anyone instantiate this class
+     * Constructs cache with given formatter
+     * and default size limit
+     * 
+     * @param formatter
      */
-    private Cache() {}
+    public Cache(Formatter formatter) {
+        this(DEFAULT_CACHE_SIZE_LIMIT, formatter);
+    }
     
     /**
-     * Returns the single {@code Cache} instance.
-     *
-     * @return the {@code Cache} object for the current application.
+     * Constructs cache with given formatter
+     * and given size limit
+     * 
+     * @param limit
+     * @param formatter
      */
-    public static Cache getInstance() {
-        return instance;
+    public Cache(int limit, Formatter formatter) {
+        sizeLimit = limit;
+        this.formatter = formatter;
+        cache = new WeakHashMap<String, V>(sizeLimit);
     }
 
     /**
-     * Stores the formatted search URL and its result in cache
-     * 
-     * @param queryString search URL
-     * @param response search result
+     * Maps the specified key to the specified value
+     *
+     * @param key
+     * @param value
      */
-    public void store(String queryString, PlacesList response) {
-        if (queue.size() == CACHE_SIZE_LIMIT) {
+    public void store(String key, V value) {
+        key = formatter.formatKey(key);
+        if (queue.size() == sizeLimit) {
             cache.remove(queue.poll());
         }
         
-        String key = format(queryString);
         queue.add(key);
-        cache.put(key, response);
+        cache.put(key, value);
     }
     
     /**
-     * Retrieves search result of given query
-     * 
-     * @param queryString
-     * @return search result or null if no such query key exists in cache
+     * Retrieve the value of the mapping with the specified key
+     *
+     * @param key
+     * @return the value of the mapping with the specified key, or {@code null}
+     *         if no mapping for the specified key is found
      */
-    public PlacesList get(String queryString) {
-        String key = format(queryString);
+    public V get(String key) {
+        key = formatter.formatKey(key);
         queue.remove(key);
         queue.add(key);
         return cache.get(key);
     }
     
     /**
-     * Checks whether the given query string has been found in the cache
-     * 
-     * @param queryString
-     * @return true if query string exists, false otherwise
+     * Returns whether this cache contains the specified key
+     *
+     * @param key the key to search for
+     * @return {@code true} if this map contains the specified key,
+     *         {@code false} otherwise
      */
-    public boolean contains(String queryString) {
-        return cache.containsKey(format(queryString));
+    public boolean contains(String key) {
+        key = formatter.formatKey(key);
+        return cache.containsKey(key);
     }
     
     /**
-     * Formats the query string used in URL as follows:
-     * "type1,type2&latitude,longitude"
-     * 
-     * @param queryString
-     * @return formatted query string
+     * @return number of items currently held in cache
      */
-    private String format(String queryString) {
-        String location = queryString.substring(queryString.indexOf("location=")+9);
-        location = location.substring(0, location.indexOf("&"));
-        String lat = location.substring(0, location.indexOf(","));
-        String lng = location.substring(location.indexOf(",") + 1);
-        
-        lat = String.format("%.3f", Double.parseDouble(lat));
-        lng = String.format("%.3f", Double.parseDouble(lng));
-        
-        String type = queryString.substring(queryString.indexOf("types=")+6);
-
-        return type + "&" + lat + "," + lng;
+    public int getSize() {
+        return cache.size();
+    }
+    
+    /**
+     * @return maximum number of items that can be held in this cache
+     */
+    public int getLimit() {
+        return sizeLimit;
+    }
+    
+    /**
+     * Removes all data held in cache
+     * Consequently on the first following GC sweep
+     * GC will attempt to free up the memory used by old objects
+     */
+    public void free() {
+        queue.clear();
+        cache.clear();
     }
 }

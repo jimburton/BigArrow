@@ -86,10 +86,38 @@ public class PlacesAPISearch {
 	private CopyOnWriteArrayList<Bitmap> photoResults;
 	
 	private ExecutorService executorService;
+	
+	private Cache<PlacesList> placesListCache;
+	private Cache<PlaceDetails> placeDetailsCache;
+	// TODO: bitmap photos cache will go here
 
 	public PlacesAPISearch(PlaceSearchRequester requester) {
 		this.requester = requester;
 		Properties prop = new Properties();
+		
+		placesListCache = new Cache<PlacesList>(new Formatter() {
+		    @Override
+		    public String formatKey(String queryString) {
+		        String location = queryString.substring(queryString.indexOf("location=")+9);
+		        location = location.substring(0, location.indexOf("&"));
+		        String lat = location.substring(0, location.indexOf(","));
+		        String lng = location.substring(location.indexOf(",") + 1);
+		        
+		        lat = String.format("%.3f", Double.parseDouble(lat));
+		        lng = String.format("%.3f", Double.parseDouble(lng));
+		        
+		        String type = queryString.substring(queryString.indexOf("types=")+6);
+		        // "type1,type2&latitude,longitude"
+		        return type + "&" + lat + "," + lng;
+		    }
+		});
+		
+		placeDetailsCache = new Cache<PlaceDetails>(new Formatter() {
+		    @Override
+		    public String formatKey(String key) {
+		        return "";    //TODO: implement
+		    }
+		});
 
 		try {
 			prop.load(PlacesAPISearch.class.getClassLoader()
@@ -142,10 +170,21 @@ public class PlacesAPISearch {
 				request.getUrl().put("sensor", "true");
 				if (estabType != null)
 					request.getUrl().put("types", estabType.toLowerCase());
-				Log.d(TAG, request.getUrl().toString());
-				places = request.execute().parseAs(PlacesList.class);
+				
+				String query = request.getUrl().toString();
+				Log.d(TAG, query);
+				
+				if (placesListCache.contains(query))
+				    places = placesListCache.get(query);
+				else {
+				    places = request.execute().parseAs(PlacesList.class);
+				    // we really should do some data validation before storing
+	                placesListCache.store(query, places);
+				}
+
 				// Check log cat for places response status
 				Log.d(TAG, "" + places.status);
+
 				return places;
 			} catch (HttpResponseException e) {
 				Log.e("Error:", e.getMessage());

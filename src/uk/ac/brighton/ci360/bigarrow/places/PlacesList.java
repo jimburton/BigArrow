@@ -9,10 +9,12 @@ package uk.ac.brighton.ci360.bigarrow.places;
  **/
 import java.io.Serializable;
 import java.util.List;
+
+import uk.ac.brighton.ci360.bigarrow.Cacheable;
  
 import com.google.api.client.util.Key;
 
-public class PlacesList implements Serializable {
+public class PlacesList implements Serializable, Cacheable {
  
     /**
 	 * 
@@ -24,5 +26,4 @@ public class PlacesList implements Serializable {
  
     @Key
     public List<Place> results;
- 
 }
