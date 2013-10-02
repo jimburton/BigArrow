@@ -9,7 +9,6 @@ package uk.ac.brighton.ci360.bigarrow.places;
  **/
 
 import java.io.Serializable;
-import java.util.Calendar;
 import java.util.LinkedHashMap;
 
 import android.annotation.SuppressLint;
