@@ -89,7 +89,6 @@ public class PlacesAPISearch {
 	
 	private Cache<PlacesList> placesListCache;
 	private Cache<PlaceDetails> placeDetailsCache;
-	// TODO: bitmap photos cache will go here
 
 	public PlacesAPISearch(PlaceSearchRequester requester) {
 		this.requester = requester;
@@ -115,7 +114,7 @@ public class PlacesAPISearch {
 		placeDetailsCache = new Cache<PlaceDetails>(new Formatter() {
 		    @Override
 		    public String formatKey(String key) {
-		        return "";    //TODO: implement
+		        return key.substring(key.indexOf("reference=") + 10, key.indexOf("&sensor"));
 		    }
 		});
 
@@ -174,8 +173,10 @@ public class PlacesAPISearch {
 				String query = request.getUrl().toString();
 				Log.d(TAG, query);
 				
-				if (placesListCache.contains(query))
+				if (placesListCache.contains(query)) {
 				    places = placesListCache.get(query);
+				    Log.d(TAG, "retrieved from cache");
+				}
 				else {
 				    places = request.execute().parseAs(PlacesList.class);
 				    // we really should do some data validation before storing
@@ -236,10 +237,23 @@ public class PlacesAPISearch {
 				request.getUrl().put("key", apiKey);
 				request.getUrl().put("reference", detailsReference);
 				request.getUrl().put("sensor", "true");
-				Log.d(TAG, request.getUrl().toString());
-				details = request.execute().parseAs(PlaceDetails.class);
-				// Check log cat for places response status
-				Log.d(TAG, "" + details.status);
+				
+				String query = request.getUrl().toString();
+                Log.d(TAG, query);
+                
+                if (placeDetailsCache.contains(query)) {
+                    details = placeDetailsCache.get(query);
+                    Log.d(TAG, "retrieved from cache");
+                }
+                else {
+                    details = request.execute().parseAs(PlaceDetails.class);
+                    // we really should do some data validation before storing
+                    placeDetailsCache.store(query, details);
+                }
+				
+                // Check log cat for places response status
+                Log.d(TAG, "" + details.status);
+				
 				return details;
 			} catch (HttpResponseException e) {
 				Log.e("Error:", e.getMessage());

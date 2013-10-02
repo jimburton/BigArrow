@@ -57,7 +57,8 @@ public class Cache<V extends Cacheable> {
     
     /**
      * Constructs cache with given formatter
-     * and given size limit
+     * and given size limit, also taking into
+     * account the default load factor of 7500 (0.75)
      * 
      * @param limit
      * @param formatter
@@ -65,7 +66,7 @@ public class Cache<V extends Cacheable> {
     public Cache(int limit, Formatter formatter) {
         sizeLimit = limit;
         this.formatter = formatter;
-        cache = new WeakHashMap<String, V>(sizeLimit);
+        cache = new WeakHashMap<String, V>((int)(sizeLimit/0.75) + 1);
     }
 
     /**
@@ -106,8 +107,7 @@ public class Cache<V extends Cacheable> {
      *         {@code false} otherwise
      */
     public boolean contains(String key) {
-        key = formatter.formatKey(key);
-        return cache.containsKey(key);
+        return cache.containsKey(formatter.formatKey(key));
     }
     
     /**
