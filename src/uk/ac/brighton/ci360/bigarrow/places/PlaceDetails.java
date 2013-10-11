@@ -9,9 +9,11 @@ package uk.ac.brighton.ci360.bigarrow.places;
  **/
 import java.io.Serializable;
 
+import uk.ac.brighton.ci360.bigarrow.Cacheable;
+
 import com.google.api.client.util.Key;
 
-public class PlaceDetails implements Serializable {
+public class PlaceDetails implements Serializable, Cacheable {
 
 	private static final long serialVersionUID = 1L;
 
