@@ -239,7 +239,7 @@ public class BigArrowGLES20Activity extends PlaceSearchActivity {
 					myLocation.getAltitude()).floatValue(),
 					System.currentTimeMillis());
 			float realHeading = headingAngle - geoField.getDeclination();
-			realHeading = normalizeDegree(myBearing - headingAngle);
+			realHeading = /*normalizeDegree(*/myBearing - headingAngle/*)*/;
 			mGLView.getRenderer().setHeading(realHeading);
 			mGLView.getRenderer().setPitch(pitchAngle);
 		}
